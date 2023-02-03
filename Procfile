@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -Dserver.port=$PORT -jar com-unik-api/target/*.jar
+web: java $JAVA_OPTS -Dserver.port=$PORT -jar com-tech-api/target/*.jar
