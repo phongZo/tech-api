@@ -1,0 +1,7 @@
+.idea/
+/com-lv-api/target/
+*.iml
+*.env
+docker-compose.yml
+com-lv-api/src/test
+E:
