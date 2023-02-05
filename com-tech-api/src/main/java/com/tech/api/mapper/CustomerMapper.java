@@ -24,10 +24,7 @@ public interface CustomerMapper {
     @Mapping(source = "username", target = "account.username")
     @Mapping(source = "password", target = "account.password", qualifiedByName = "passwordEncoder")
     @Mapping(source = "email", target = "account.email")
-    @Mapping(source = "phone", target = "account.phone")
     @Mapping(source = "fullName", target = "account.fullName")
-    @Mapping(source = "gender", target = "gender")
-    @Mapping(source = "birthday", target = "birthday")
     Customer fromCustomerRegisterFormToEntity(RegisterCustomerForm registerCustomerForm);
 
     @Named("fromCustomerCreateFormToEntity")

@@ -14,7 +14,7 @@ import java.util.List;
 public class Customer extends Auditable<String> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @OneToOne(cascade = {CascadeType.ALL})

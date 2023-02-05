@@ -15,7 +15,7 @@ import java.util.Date;
 @Setter
 public class Account extends  Auditable<String>{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private Integer kind;
     private String username;
@@ -49,4 +49,6 @@ public class Account extends  Auditable<String>{
     private String verifyCode;
     @Column(name = "verify_time")
     private Date verifyTime;
+    @Column(name = "is_new_account")
+    private Boolean isNewAccount = false;
 }

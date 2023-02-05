@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Table(name = TablePrefix.PREFIX_TABLE + "promotion")
 public class Promotion extends Auditable<String>{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String title;

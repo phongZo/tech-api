@@ -119,6 +119,11 @@
                 <artifactId>postgresql</artifactId>
                 <version>42.2.24</version>
             </dependency>
+            <dependency>
+                <groupId>com.twilio.sdk</groupId>
+                <artifactId>twilio</artifactId>
+                <version>8.8.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
