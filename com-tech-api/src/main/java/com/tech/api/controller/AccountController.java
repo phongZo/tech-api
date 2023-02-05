@@ -134,7 +134,7 @@ public class AccountController extends ABasicController{
     public ApiMessageDto<LoginDto> login(@Valid @RequestBody ClientLoginForm clientLoginForm, BindingResult bindingResult) {
 
         ApiMessageDto<LoginDto> apiMessageDto = new ApiMessageDto<>();
-        Account account = accountRepository.findAccountByEmailOrUsername(clientLoginForm.getUsernameOrEmail());
+        Account account = accountRepository.findAccountByUsernameOrPhone(clientLoginForm.getUsernameOrPhone());
         if (account == null || !passwordEncoder.matches(clientLoginForm.getPassword(), account.getPassword()) || !Objects.equals(account.getStatus() , Constants.STATUS_ACTIVE)) {
             throw new RequestException(ErrorCode.CUSTOMER_ERROR_NOT_FOUND, "Login fail, check your username or password");
         }

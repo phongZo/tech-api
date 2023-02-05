@@ -12,7 +12,7 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
     Long countAccountByUsernameOrEmailOrPhone(String username, String email, String phone);
     Long countAccountByUsername(String username);
     Long countAccountByPhoneOrEmail(String phone, String email);
-    @Query("SELECT a FROM Account a WHERE a.username = ?1 OR a.email = ?1")
-    Account findAccountByEmailOrUsername(String usernameOrEmail);
+    @Query("SELECT a FROM Account a WHERE a.username = ?1 OR a.phone = ?1")
+    Account findAccountByUsernameOrPhone(String usernameOrPhone);
 
 }
