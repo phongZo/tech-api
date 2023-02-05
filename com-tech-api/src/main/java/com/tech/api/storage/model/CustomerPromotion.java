@@ -12,7 +12,7 @@ import java.util.Date;
 @Table(name = TablePrefix.PREFIX_TABLE + "customer_promotion")
 public class CustomerPromotion extends Auditable<String>{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

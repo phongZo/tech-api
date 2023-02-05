@@ -12,7 +12,7 @@ import javax.persistence.*;
 @Table(name = TablePrefix.PREFIX_TABLE + "store")
 public class Store extends Auditable<String> {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String posId;
     @JsonIgnore

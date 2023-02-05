@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name = TablePrefix.PREFIX_TABLE + "product")
 public class Product extends Auditable<String> {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)

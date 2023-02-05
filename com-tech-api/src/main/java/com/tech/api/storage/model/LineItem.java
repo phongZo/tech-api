@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Table(name = TablePrefix.PREFIX_TABLE+"line_item")
 public class LineItem extends Auditable<String>{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -4,8 +4,11 @@ import com.tech.api.constant.Constants;
 import com.tech.api.dto.ApiMessageDto;
 import com.tech.api.dto.ErrorCode;
 import com.tech.api.dto.ResponseListObj;
+import com.tech.api.dto.account.ForgetPasswordDto;
+import com.tech.api.dto.account.ValidateEmailDto;
 import com.tech.api.dto.customer.CustomerDto;
 import com.tech.api.dto.customer.CustomerPromotionDto;
+import com.tech.api.form.account.RequestValidateEmailForm;
 import com.tech.api.form.customer.*;
 import com.tech.api.form.wallet.RechargeForm;
 import com.tech.api.mapper.CustomerMapper;
@@ -24,6 +27,7 @@ import com.tech.api.exception.RequestException;
 import com.tech.api.storage.model.*;
 import com.tech.api.form.customer.*;
 import com.tech.api.storage.repository.*;
+import com.tech.api.utils.AESUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -177,18 +181,52 @@ public class CustomerController extends ABasicController {
         return new ApiMessageDto<>("Create customer successfully");
     }
 
+    @PostMapping(value = "/request_validate_email", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<ValidateEmailDto> requestValidateEmail(@Valid @RequestBody RequestValidateEmailForm validateEmailForm, BindingResult bindingResult) {
+        ApiMessageDto<ValidateEmailDto> apiMessageDto = new ApiMessageDto<>();
+        Account account = accountRepository.findFirstByEmail(validateEmailForm.getEmail());
+        if(account != null && account.getStatus().equals(Constants.STATUS_ACTIVE)){
+            throw new RequestException(ErrorCode.ACCOUNT_ERROR_EXISTED, "Email is existed");
+        }
+        if(account == null){
+            account = new Account();
+            account.setEmail(validateEmailForm.getEmail());
+            account.setStatus(Constants.STATUS_PENDING);
+            account.setIsNewAccount(true);
+
+            Group group = groupRepository.findFirstByKind(Constants.GROUP_KIND_CUSTOMER);
+            account.setGroup(group);
+            account = accountRepository.save(account);
+        }
+        String otp = commonApiService.getOTPValidateEmail();
+        account.setVerifyCode(otp);
+        account.setVerifyTime(new Date());
+        accountRepository.save(account);
+
+        //send email
+        commonApiService.sendEmail(account.getEmail(),"OTP: "+otp, "Verify account",false);
+
+        ValidateEmailDto dto = new ValidateEmailDto();
+        dto.setAccountId(account.getId());
+        apiMessageDto.setResult(true);
+        apiMessageDto.setData(dto);
+        apiMessageDto.setMessage("Request validate email success, please check email.");
+        return apiMessageDto;
+    }
+
     @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<String> register(@Valid @RequestBody RegisterCustomerForm registerCustomerForm, BindingResult bindingResult) {
-        if (accountRepository.countAccountByUsernameOrEmailOrPhone(
-                registerCustomerForm.getUsername(), registerCustomerForm.getEmail(), registerCustomerForm.getPhone()
-        ) > 0)
-            throw new RequestException(ErrorCode.ACCOUNT_ERROR_EXISTED, "Account is existed");
+        Account account = accountRepository.findFirstByEmail(registerCustomerForm.getEmail());
+        if (account == null || !account.getStatus().equals(Constants.STATUS_ACTIVE) || !account.getIsNewAccount())
+            throw new RequestException(ErrorCode.ACCOUNT_ERROR_EXISTED, "Email not validated");
 
         Group groupCustomer = groupRepository.findFirstByKind(Constants.GROUP_KIND_CUSTOMER);
         if (groupCustomer == null) {
             throw new RequestException(ErrorCode.GROUP_ERROR_NOT_FOUND);
         }
-        Customer customer = customerMapper.fromCustomerRegisterFormToEntity(registerCustomerForm);
+        Customer customer = new Customer();
+        customer.setAccount(account);
+        customer = customerMapper.fromCustomerRegisterFormToEntity(registerCustomerForm);
         customer.getAccount().setGroup(groupCustomer);
         customer.getAccount().setKind(Constants.USER_KIND_CUSTOMER);
         //rank?

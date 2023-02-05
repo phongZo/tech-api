@@ -12,7 +12,7 @@ import javax.persistence.*;
 public class CustomerAddress extends Auditable<String>{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)

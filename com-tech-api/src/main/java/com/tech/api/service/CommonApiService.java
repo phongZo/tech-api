@@ -125,6 +125,10 @@ public class CommonApiService {
         return OTPService.generate(4);
     }
 
+    public String getOTPValidateEmail(){
+        return OTPService.generate(6);
+    }
+
     public synchronized Long getOrderHash(){
         return Long.parseLong(OTPService.generate(9));
     }
