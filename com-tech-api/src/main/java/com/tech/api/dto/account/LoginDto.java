@@ -12,5 +12,5 @@ public class LoginDto {
     private long id;
     private Date expired;
     private Integer kind;
-
+    private Long customerId;
 }

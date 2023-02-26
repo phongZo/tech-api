@@ -67,25 +67,22 @@ public class ProductController extends ABasicController {
     @GetMapping(value = "/client-list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<ProductDto>> clientList(ProductCriteria productCriteria, Pageable pageable) {
         ApiMessageDto<ResponseListObj<ProductDto>> responseListObjApiMessageDto = new ApiMessageDto<>();
-
+        Customer customerCheck = new Customer();
+        if(productCriteria.getCustomerId() != null){
+            customerCheck = customerRepository.findById(productCriteria.getCustomerId()).orElse(null);
+        }
         Page<Product> productList = productRepository.findAll(productCriteria.getSpecification(), pageable);
         ResponseListObj<ProductDto> responseListObj = new ResponseListObj<>();
-        if(productCriteria.getCustomerId() != null){
+        if(productCriteria.getCustomerId() == null || customerCheck == null){
             List<Product> modifiableList = new ArrayList<Product>(productList.getContent());
             Collections.reverse(modifiableList);
             responseListObj.setData(productMapper.fromEntityListToProductClientDtoList(modifiableList));
         }
-        else if(isCustomer()){
+        else {
             List<ProductDto> dto = new ArrayList<>();
-            Long customerId = getCurrentCustomer().getId();
             for (Product product : productList){
                 ProductDto productDto = productMapper.fromEntityToClientDto(product);
-                for(Customer customer : product.getCustomersLiked()){
-                    if(customer.getId().equals(customerId)){
-                        productDto.setIsLike(true);
-                        break;
-                    }
-                }
+                productDto.setIsLike(true);
                 dto.add(productDto);
             }
             responseListObj.setData(dto);
