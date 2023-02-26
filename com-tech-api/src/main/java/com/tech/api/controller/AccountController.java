@@ -12,7 +12,9 @@ import com.tech.api.mapper.AccountMapper;
 import com.tech.api.service.CommonApiService;
 import com.tech.api.storage.criteria.AccountCriteria;
 import com.tech.api.storage.model.Account;
+import com.tech.api.storage.model.Customer;
 import com.tech.api.storage.model.Group;
+import com.tech.api.storage.repository.CustomerRepository;
 import com.tech.api.storage.repository.GroupRepository;
 import com.tech.api.utils.AESUtils;
 import com.tech.api.utils.ConvertUtils;
@@ -54,6 +56,9 @@ public class AccountController extends ABasicController{
 
     @Autowired
     GroupRepository groupRepository;
+
+    @Autowired
+    CustomerRepository customerRepository;
 
     @Autowired
     CommonApiService commonApiService;
@@ -138,10 +143,16 @@ public class AccountController extends ABasicController{
         if (account == null || !passwordEncoder.matches(clientLoginForm.getPassword(), account.getPassword()) || !Objects.equals(account.getStatus() , Constants.STATUS_ACTIVE)) {
             throw new RequestException(ErrorCode.CUSTOMER_ERROR_NOT_FOUND, "Login fail, check your username or password");
         }
+        Customer customer = customerRepository.findCustomerByAccountId(account.getId());
+        if(customer == null || !customer.getStatus().equals(Constants.STATUS_ACTIVE)){
+            throw new RequestException(ErrorCode.CUSTOMER_ERROR_NOT_FOUND, "Not found customer");
+        }
         LoginDto loginDto = generateJWT(account);
+        loginDto.setCustomerId(customer.getId());
         apiMessageDto.setData(loginDto);
         apiMessageDto.setMessage("Login account success");
         account.setLastLogin(new Date());
+
         //update lastLogin
         accountRepository.save(account);
         return apiMessageDto;
