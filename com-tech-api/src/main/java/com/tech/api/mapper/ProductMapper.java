@@ -25,6 +25,8 @@ public interface ProductMapper {
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
+    @Mapping(source = "isSaleOff", target = "isSaleOff")
+    @Mapping(source = "saleOff", target = "saleOff")
     @Mapping(source = "kind", target = "kind")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "productConfigs", target = "productConfigs", qualifiedByName = "fromCreateProductConfigFormListToEntityListMapper")
