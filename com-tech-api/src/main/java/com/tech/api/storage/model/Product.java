@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class Product extends Auditable<String> {
     private String name;
 
     @Column(name = "price")
-    private Double price;
+    private BigDecimal price;
 
     private Integer saleOff;   //percent
     private Boolean isSaleOff = false;

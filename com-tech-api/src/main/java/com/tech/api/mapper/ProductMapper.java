@@ -23,7 +23,7 @@ public interface ProductMapper {
     @Mapping(source = "tags", target = "tags")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "name", target = "name")
-    @Mapping(source = "price", target = "price", qualifiedByName = "convertDoubleToString")
+    @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
     @Mapping(source = "isSaleOff", target = "isSaleOff")
@@ -44,20 +44,13 @@ public interface ProductMapper {
     @Mapping(source = "avgStar", target = "avgStar")
     @Mapping(source = "totalReview", target = "totalReview")
     @Mapping(source = "soldAmount", target = "soldAmount")
-    @Mapping(source = "price", target = "price", qualifiedByName = "convertDoubleToString")
+    @Mapping(source = "price", target = "price")
     @BeanMapping(ignoreByDefault = true)
     @Named("clientGetMapping")
     ProductDto fromEntityToClientDto(Product product);
 
     @IterableMapping(elementTargetType = ProductDto.class, qualifiedByName = "clientGetMapping")
     List<ProductDto> fromEntityListToProductClientDtoList(List<Product> products);
-
-    @Named("convertDoubleToString")
-    static String convertDoubleToString(Double value) {
-        // Use a formatter that does not use scientific notation
-        DecimalFormat formatter = new DecimalFormat("0.######");
-        return formatter.format(value);
-    }
 
     @Named("fromProductEntityToDtoMapper")
     @BeanMapping(ignoreByDefault = true)
@@ -66,7 +59,7 @@ public interface ProductMapper {
     @Mapping(source = "saleOff", target = "saleOff")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "name", target = "name")
-    @Mapping(source = "price", target = "price", qualifiedByName = "convertDoubleToString")
+    @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
     @Mapping(source = "parentProduct.id", target = "parentProductId")
