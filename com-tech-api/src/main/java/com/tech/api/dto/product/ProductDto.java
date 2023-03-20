@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -34,7 +35,7 @@ public class ProductDto {
     private String name;
 
     @ApiModelProperty(name = "price")
-    private String price;
+    private BigDecimal price;
 
     @ApiModelProperty(name = "image")
     private String image;
