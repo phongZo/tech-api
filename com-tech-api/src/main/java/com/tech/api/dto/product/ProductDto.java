@@ -34,7 +34,7 @@ public class ProductDto {
     private String name;
 
     @ApiModelProperty(name = "price")
-    private Double price;
+    private String price;
 
     @ApiModelProperty(name = "image")
     private String image;
