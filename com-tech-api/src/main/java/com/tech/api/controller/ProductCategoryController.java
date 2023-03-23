@@ -2,6 +2,7 @@ package com.tech.api.controller;
 
 import com.tech.api.dto.ApiMessageDto;
 import com.tech.api.dto.ErrorCode;
+import com.tech.api.dto.ResponseListObj;
 import com.tech.api.dto.productcategory.ProductCategoryDto;
 import com.tech.api.form.productcategory.CreateProductCategoryForm;
 import com.tech.api.form.productcategory.UpdateProductCategoryForm;
@@ -14,6 +15,7 @@ import com.tech.api.storage.repository.ProductCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
@@ -33,16 +35,19 @@ public class ProductCategoryController extends ABasicController {
     private final CommonApiService commonApiService;
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<List<ProductCategoryDto>> list(ProductCategoryCriteria productCategoryCriteria) {
+    public ApiMessageDto<ResponseListObj<ProductCategoryDto>> list(ProductCategoryCriteria productCategoryCriteria) {
         List<ProductCategory> categoryList = productCategoryRepository.findAll(productCategoryCriteria.getSpecification(), Sort.by(Sort.Order.asc("orderSort")));
-        return new ApiMessageDto<>(productCategoryMapper.fromProductCategoryListToDtoList(categoryList), "Get list successfully");
+        return new ApiMessageDto<>(
+                new ResponseListObj<>(productCategoryMapper.fromProductCategoryListToDtoList(categoryList)),
+                "Get list successfully"
+        );
     }
 
     @GetMapping(value = "/auto-complete", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<List<ProductCategoryDto>> autoComplete(ProductCategoryCriteria productCategoryCriteria) {
+    public ApiMessageDto<ResponseListObj<ProductCategoryDto>> autoComplete(ProductCategoryCriteria productCategoryCriteria) {
         List<ProductCategory> productCategoryList = productCategoryRepository.findAll(productCategoryCriteria.getSpecification(), Sort.by(Sort.Order.asc("name")));
         return new ApiMessageDto<>(
-                productCategoryMapper.fromProductCategoryListToDtoList(productCategoryList),
+                new ResponseListObj<>(productCategoryMapper.fromProductCategoryListToDtoList(productCategoryList)),
                 "Get list successfully"
         );
     }
