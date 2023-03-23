@@ -16,6 +16,9 @@ public class ResponseListObj<T> {
     public ResponseListObj() {
 
     }
+    public ResponseListObj(List<T> data) {
+        this.data = data;
+    }
     public ResponseListObj(List<T> data, Page page) {
         this.data = data;
         this.page = page.getNumber();

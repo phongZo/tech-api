@@ -125,20 +125,6 @@ public class ProductController extends ABasicController {
         return apiMessageDto;
     }
 
-    // For store to update sell status
-    @PutMapping(value = "/update-sell-status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<String> updateSellStatus(@Valid @RequestBody UpdateSellStatusForm updateSellStatusForm, BindingResult bindingResult) {
-        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-        Product product = productRepository.findById(updateSellStatusForm.getProductId()).orElse(null);
-        if(product == null || !product.getStatus().equals(Constants.STATUS_ACTIVE)){
-            throw new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Not found product.");
-        }
-        product.setIsSoldOut(updateSellStatusForm.getIsSoldOut());
-        productRepository.save(product);
-        apiMessageDto.setMessage("Update status success");
-        return apiMessageDto;
-    }
-
     private Customer getCurrentCustomer() {
         Long userId = getCurrentUserId();
         Customer customer = customerRepository.findCustomerByAccountId(userId);
@@ -149,10 +135,12 @@ public class ProductController extends ABasicController {
     }
 
     @GetMapping(value = "/auto-complete", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<List<ProductDto>> autoComplete(@Valid ProductCriteria productCriteria) {
+    public ApiMessageDto<ResponseListObj<ProductDto>> autoComplete(@Valid ProductCriteria productCriteria) {
         Page<Product> productPage = productRepository.findAll(productCriteria.getSpecification(), Pageable.unpaged());
         List<ProductDto> productDtoList = productMapper.fromProductEntityListToDtoListAutoComplete(productPage.getContent());
-        return new ApiMessageDto<>(productDtoList, "Get list successfully");
+        return new ApiMessageDto<>(
+                new ResponseListObj<>(productDtoList), "Get list successfully"
+        );
     }
 
     @GetMapping(value = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -161,6 +149,23 @@ public class ProductController extends ABasicController {
                 .orElseThrow(() -> new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Product not found"));
         ProductAdminDto productAdminDto = productMapper.fromProductEntityToAdminDto(product);
         return new ApiMessageDto<>(productAdminDto, "Get product successfully");
+    }
+
+    @GetMapping(value = "/client-get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<ProductDto> clientGet(@PathVariable(name = "id") Long id, @RequestParam(value = "customerId",required = false) Long customerId) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Product not found"));
+        ProductDto productDto = productMapper.fromProductEntityToDto(product);
+        if (customerId != null){
+            List<Long> listId = new ArrayList<>();
+            for (Customer customer : product.getCustomersLiked()){
+                listId.add(customer.getId());
+            }
+            if(listId.contains(customerId)){
+                productDto.setIsLike(true);
+            }
+        }
+        return new ApiMessageDto<>(productDto, "Get product successfully");
     }
 
     @Transactional
