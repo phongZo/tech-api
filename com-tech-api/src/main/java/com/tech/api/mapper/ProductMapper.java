@@ -20,7 +20,6 @@ public interface ProductMapper {
 
     @Named("fromCreateProductFormToEntityMapper")
     @BeanMapping(ignoreByDefault = true)
-    @Mapping(source = "tags", target = "tags")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")
@@ -28,7 +27,6 @@ public interface ProductMapper {
     @Mapping(source = "isSoldOut", target = "isSoldOut")
     @Mapping(source = "isSaleOff", target = "isSaleOff")
     @Mapping(source = "saleOff", target = "saleOff")
-    @Mapping(source = "kind", target = "kind")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "productConfigs", target = "productConfigs", qualifiedByName = "fromCreateProductConfigFormListToEntityListMapper")
     Product fromCreateProductFormToEntity(CreateProductForm createProductForm);
@@ -36,7 +34,6 @@ public interface ProductMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "saleOff", target = "saleOff")
-    @Mapping(source = "tags", target = "tags")
     @Mapping(source = "isSaleOff", target = "isSaleOff")
     @Mapping(source = "image", target = "image")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
@@ -63,7 +60,6 @@ public interface ProductMapper {
     @Mapping(source = "image", target = "image")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
     @Mapping(source = "parentProduct.id", target = "parentProductId")
-    @Mapping(source = "kind", target = "kind")
     ProductDto fromProductEntityToDto(Product product);
 
     @Named("fromProductEntityListToDtoListMapper")
@@ -86,27 +82,23 @@ public interface ProductMapper {
     @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "id", target = "id")
     @Mapping(source = "category.id", target = "productCategoryId")
-    @Mapping(source = "tags", target = "tags")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
     @Mapping(source = "parentProduct.id", target = "parentProductId")
-    @Mapping(source = "kind", target = "kind")
     @Mapping(source = "productConfigs", target = "productConfigs", qualifiedByName = "fromProductConfigEntityListToDtoListMapper")
     ProductDto fromProductEntityToDtoDetails(Product product);
 
     @Named("fromProductEntityToAdminDtoMapper")
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "tags", target = "tags")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")
     @Mapping(source = "isSaleOff", target = "isSaleOff")
     @Mapping(source = "saleOff", target = "saleOff")
     @Mapping(source = "image", target = "image")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
-    @Mapping(source = "kind", target = "kind")
     ProductAdminDto fromProductEntityToAdminDto(Product product);
 
     @Named("fromProductEntityListToAdminDtoListMapper")
@@ -115,7 +107,6 @@ public interface ProductMapper {
 
     @Named("fromUpdateProductFormToEntityMapper")
     @BeanMapping(ignoreByDefault = true)
-    @Mapping(source = "tags", target = "tags")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")

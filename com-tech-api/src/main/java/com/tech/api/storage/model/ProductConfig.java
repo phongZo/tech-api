@@ -17,12 +17,6 @@ public class ProductConfig extends Auditable<String> {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "choice_kind")
-    private Integer choiceKind;
-
-    @Column(name = "is_required")
-    private Boolean isRequired;
-
     @Column(name = "name")
     private String name;
 

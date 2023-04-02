@@ -22,9 +22,6 @@ public class Product extends Auditable<String> {
     @JoinColumn(name = "category_id")
     private ProductCategory category;
 
-    @Column(name = "tag")
-    private String tags;
-
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
@@ -49,9 +46,6 @@ public class Product extends Auditable<String> {
 
     @Column(name = "is_sold_out")
     private Boolean isSoldOut = false;
-
-    @Column(name = "kind")
-    private Integer kind;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")

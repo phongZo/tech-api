@@ -17,15 +17,6 @@ import java.util.List;
 @Getter
 @Setter
 public class CreateProductConfigForm {
-
-    @VariantChoiceKind
-    @ApiModelProperty(name = "choiceKind", required = true)
-    private Integer choiceKind;
-
-    @NotNull
-    @ApiModelProperty(name = "isRequired", required = true)
-    private Boolean isRequired;
-
     @NotBlank
     @ApiModelProperty(name = "name", required = true)
     private String name;

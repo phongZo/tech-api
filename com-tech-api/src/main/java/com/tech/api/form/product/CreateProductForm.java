@@ -22,11 +22,6 @@ public class CreateProductForm {
     @ApiModelProperty(name = "categoryId", notes = "Category có thể null do product có thể không thuộc category nào")
     private Long categoryId;
 
-    @Hashtag
-    @Size(max = 255)
-    @ApiModelProperty(name = "tags")
-    private String tags;
-
     @ApiModelProperty(name = "description")
     private String description;
 
@@ -49,10 +44,6 @@ public class CreateProductForm {
 
     @ApiModelProperty(name = "parentProductId")
     private Long parentProductId;
-
-    @ProductKind
-    @ApiModelProperty(name = "kind", required = true, notes = "1: product thường, 2: product nhóm")
-    private Integer kind;
 
     @Status
     @ApiModelProperty(name = "status")

@@ -25,6 +25,6 @@ public class StringUtils {
     }
 
     public static String generateRandomString(int length) {
-        return RandomStringUtils.randomAlphanumeric(length).toUpperCase();
+        return RandomStringUtils.randomAlphanumeric(length).toLowerCase();
     }
 }

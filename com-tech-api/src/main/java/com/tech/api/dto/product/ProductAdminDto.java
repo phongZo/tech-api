@@ -15,9 +15,6 @@ public class ProductAdminDto extends ABasicAdminDto {
     @ApiModelProperty(name = "productCategoryId")
     private Long productCategoryId;
 
-    @ApiModelProperty(name = "tags")
-    private String tags;
-
     @ApiModelProperty(name = "description")
     private String description;
 
@@ -38,9 +35,6 @@ public class ProductAdminDto extends ABasicAdminDto {
 
     private Boolean isSaleOff = false;
     private Integer saleOff;
-
-    @ApiModelProperty(name = "kind")
-    private Integer kind;
 
     @ApiModelProperty(name = "productConfigs")
     private List<ProductConfigAdminDto> productConfigs;
