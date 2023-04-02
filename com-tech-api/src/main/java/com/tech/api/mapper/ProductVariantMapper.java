@@ -21,7 +21,6 @@ public interface ProductVariantMapper {
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
-    @Mapping(source = "orderSort", target = "orderSort")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "status", target = "status")
     ProductVariant fromCreateProductVariantFormToEntity(CreateProductVariantForm createProductVariantForm);
@@ -36,7 +35,6 @@ public interface ProductVariantMapper {
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
-    @Mapping(source = "orderSort", target = "orderSort")
     @Mapping(source = "description", target = "description")
     ProductVariantDto fromProductVariantEntityToDto(ProductVariant productVariant);
 
@@ -63,7 +61,6 @@ public interface ProductVariantMapper {
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
-    @Mapping(source = "orderSort", target = "orderSort")
     @Mapping(source = "description", target = "description")
     ProductVariantAdminDto fromProductVariantEntityToAdminDto(ProductVariant productVariant);
 
@@ -77,7 +74,6 @@ public interface ProductVariantMapper {
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
-    @Mapping(source = "orderSort", target = "orderSort")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "status", target = "status")
     ProductVariant fromUpdateProductVariantFormToEntity(UpdateProductVariantForm updateProductVariantForm);

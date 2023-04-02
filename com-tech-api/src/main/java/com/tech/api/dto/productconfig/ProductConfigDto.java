@@ -14,12 +14,6 @@ public class ProductConfigDto {
     @ApiModelProperty(name = "id")
     private Long id;
 
-    @ApiModelProperty(name = "choiceKind")
-    private Integer choiceKind;
-
-    @ApiModelProperty(name = "isRequired")
-    private Boolean isRequired;
-
     @ApiModelProperty(name = "name")
     private String name;
 

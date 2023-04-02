@@ -19,8 +19,6 @@ public interface ProductConfigMapper {
 
     @Named("fromCreateProductConfigFormToEntityMapper")
     @BeanMapping(ignoreByDefault = true)
-    @Mapping(source = "choiceKind", target = "choiceKind")
-    @Mapping(source = "isRequired", target = "isRequired")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "variants", target = "variants", qualifiedByName = "fromCreateProductVariantFormListToEntityListMapper")
@@ -33,8 +31,6 @@ public interface ProductConfigMapper {
     @Named("fromProductConfigEntityToDtoMapper")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "choiceKind", target = "choiceKind")
-    @Mapping(source = "isRequired", target = "isRequired")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "variants", target = "variants", qualifiedByName = "fromProductVariantEntityListToDtoListMapper")
     ProductConfigDto fromProductConfigEntityToDto(ProductConfig productConfig);
@@ -45,8 +41,6 @@ public interface ProductConfigMapper {
 
     @Named("fromProductConfigEntityToAdminDtoMapper")
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "choiceKind", target = "choiceKind")
-    @Mapping(source = "isRequired", target = "isRequired")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "variants", target = "variants", qualifiedByName = "fromProductVariantEntityListToAdminDtoListMapper")
     ProductConfigAdminDto fromProductConfigEntityToAdminDto(ProductConfig productConfig);
@@ -58,8 +52,6 @@ public interface ProductConfigMapper {
     @Named("fromUpdateProductConfigFormToEntityMapper")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "choiceKind", target = "choiceKind")
-    @Mapping(source = "isRequired", target = "isRequired")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "variants", target = "variants", qualifiedByName = "fromUpdateProductVariantFormListToEntityListMapper")

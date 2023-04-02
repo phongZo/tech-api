@@ -23,10 +23,6 @@ public class CreateProductVariantForm {
     @ApiModelProperty(name = "image")
     private String image;
 
-    @NotNull(message = "Order sort can not be null")
-    @ApiModelProperty(name = "orderSort", required = true)
-    private Integer orderSort;
-
     @ApiModelProperty(name = "description")
     private String description;
 

@@ -23,7 +23,4 @@ public class ProductVariantDto {
     @ApiModelProperty(name = "image")
     private String image;
 
-    @ApiModelProperty(name = "orderSort")
-    private String orderSort;
-
 }

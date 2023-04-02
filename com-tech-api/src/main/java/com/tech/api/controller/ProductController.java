@@ -180,10 +180,6 @@ public class ProductController extends ABasicController {
         if (createProductForm.getParentProductId() != null) {
             Product parentProduct = productRepository.findById(createProductForm.getParentProductId())
                     .orElseThrow(() -> new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Parent product not found"));
-            if (!parentProduct.getKind().equals(Constants.PRODUCT_KIND_GROUP)) {
-                parentProduct.setKind(Constants.PRODUCT_KIND_GROUP);
-                parentProduct = productRepository.saveAndFlush(parentProduct);
-            }
             product.setParentProduct(parentProduct);
         }
         productRepository.save(product);
@@ -222,10 +218,6 @@ public class ProductController extends ABasicController {
         if (updateProductForm.getParentProductId() != null) {
             Product parentProduct = productRepository.findById(updateProductForm.getParentProductId())
                     .orElseThrow(() -> new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Parent product not found"));
-            if (!parentProduct.getKind().equals(Constants.PRODUCT_KIND_GROUP)) {
-                parentProduct.setKind(Constants.PRODUCT_KIND_GROUP);
-                parentProduct = productRepository.saveAndFlush(parentProduct);
-            }
             product.setParentProduct(parentProduct);
         } else {
             product.setParentProduct(null);

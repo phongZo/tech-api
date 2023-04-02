@@ -21,14 +21,6 @@ public class UpdateProductConfigForm {
     @ApiModelProperty(name = "id")
     private Long id;
 
-    @VariantChoiceKind
-    @ApiModelProperty(name = "choiceKind", required = true)
-    private Integer choiceKind;
-
-    @NotNull
-    @ApiModelProperty(name = "isRequired", required = true)
-    private Boolean isRequired;
-
     @NotBlank
     @ApiModelProperty(name = "name", required = true)
     private String name;

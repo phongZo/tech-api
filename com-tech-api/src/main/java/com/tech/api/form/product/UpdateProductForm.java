@@ -24,11 +24,6 @@ public class UpdateProductForm {
     @ApiModelProperty(name = "categoryId", notes = "Category có thể null do product có thể không thuộc category nào")
     private Long categoryId;
 
-    @Hashtag
-    @Size(max = 255)
-    @ApiModelProperty(name = "tags")
-    private String tags;
-
     @ApiModelProperty(name = "description")
     private String description;
 

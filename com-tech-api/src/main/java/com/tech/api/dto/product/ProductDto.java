@@ -23,9 +23,6 @@ public class ProductDto {
     @ApiModelProperty(name = "productCategoryId")
     private Long productCategoryId;
 
-    @ApiModelProperty(name = "tags")
-    private String tags;
-
     private Integer totalReview;
 
     @ApiModelProperty(name = "description")
@@ -45,9 +42,6 @@ public class ProductDto {
 
     @ApiModelProperty(name = "parentProductId")
     private Long parentProductId;
-
-    @ApiModelProperty(name = "kind")
-    private Integer kind;
 
     private Integer avgStar;
 
