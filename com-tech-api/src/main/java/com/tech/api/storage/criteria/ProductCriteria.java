@@ -52,15 +52,6 @@ public class ProductCriteria {
                 criteriaQuery.distinct(true);
             }
 
-            if (getTags() != null) {
-                this.tags = getTags().stream().map(tag -> tag.toLowerCase().trim()).collect(Collectors.toList());
-                List<Predicate> predicatesOr = new ArrayList<>();
-                for (String tag : tags) {
-                    predicatesOr.add(cb.like(cb.lower(root.get("tags")), "%" + tag + "%"));
-                }
-                predicates.add(cb.or(predicatesOr.toArray(new Predicate[]{})));
-            }
-
             if (getDescription() != null) {
                 predicates.add(cb.like(cb.lower(root.get("description")), "%" + getDescription().toLowerCase() + "%"));
             }
