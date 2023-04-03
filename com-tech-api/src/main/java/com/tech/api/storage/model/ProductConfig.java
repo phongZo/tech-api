@@ -27,6 +27,5 @@ public class ProductConfig extends Auditable<String> {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = ProductVariant.class)
     @JoinColumn(name = "product_config_id")
     @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
-    @OrderBy(value = "orderSort")
     List<ProductVariant> variants = new ArrayList<>();
 }
