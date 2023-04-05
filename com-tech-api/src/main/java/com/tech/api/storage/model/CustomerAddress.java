@@ -19,7 +19,7 @@ public class CustomerAddress extends Auditable<String>{
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @Column(name = "address_details")
+    @Column(name = "address_details", columnDefinition = "text")
     private String addressDetails;
 
     @Column(name = "receiver_full_name")
