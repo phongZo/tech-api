@@ -162,6 +162,9 @@ public class AccountController extends ABasicController{
         String appendStringRole = "";
         if(Objects.equals(account.getKind(), Constants.USER_KIND_ADMIN)){
             appendStringRole = "/account/profile,/account/update_profile,/account/logout";
+            if(account.getIsSuperAdmin()){
+                appendStringRole += ",/orders/archive";
+            }
         } else if(Objects.equals(account.getKind(), Constants.USER_KIND_CUSTOMER)) {
             appendStringRole = "/customer/profile,/customer/update-profile,/account/logout";
         } else if(Objects.equals(account.getKind(), Constants.USER_KIND_EMPLOYEE)) {

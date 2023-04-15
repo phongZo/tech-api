@@ -12,6 +12,8 @@ public class Constants {
     public static final Integer USER_KIND_EMPLOYEE = 3;
     public static final Integer USER_KIND_COLLABORATOR = 4;
 
+    public static final String LOYALTY_MAX_POINT = "4000,12000,25000,40000,60000,100000";
+
     public static final Integer STATUS_ACTIVE = 1;
     public static final Integer STATUS_PENDING = 0;
     public static final Integer STATUS_LOCK = -1;
@@ -33,6 +35,7 @@ public class Constants {
     public static final Integer ORDERS_STATE_SHIPPING = 2;
     public static final Integer ORDERS_STATE_COMPLETED = 3;
     public static final Integer ORDERS_STATE_CANCELED = 4;
+    public static final Integer ORDERS_STATE_ARCHIVE = 5;
 
     public static final Integer ORDER_VAT = 10;
 

@@ -20,6 +20,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/permission")
@@ -33,18 +34,15 @@ public class PermissionController extends ABasicController{
     PermissionMapper permissionMapper;
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<ResponseListObj<PermissionAdminDto>> getList(PermissionCriteria permissionCriteria, Pageable pageable){
+    public ApiMessageDto<ResponseListObj<PermissionAdminDto>> getList(PermissionCriteria permissionCriteria){
         if(!isSuperAdmin()){
             throw new RequestException(ErrorCode.PERMISSION_ERROR_UNAUTHORIZED);
         }
         ApiMessageDto<ResponseListObj<PermissionAdminDto>> apiMessageDto = new ApiMessageDto<>();
-        Page<Permission> permissionPage = permissionRepository.findAll(permissionCriteria.getSpecification(),pageable);
+        List<Permission> permissions = permissionRepository.findAll(permissionCriteria.getSpecification());
 
         ResponseListObj<PermissionAdminDto> responseListObj = new ResponseListObj<>();
-        responseListObj.setData(permissionMapper.fromEntityListToAdminDtoList(permissionPage.getContent()));
-        responseListObj.setPage(pageable.getPageNumber());
-        responseListObj.setTotalPage(permissionPage.getTotalPages());
-        responseListObj.setTotalElements(permissionPage.getTotalElements());
+        responseListObj.setData(permissionMapper.fromEntityListToAdminDtoList(permissions));
 
         apiMessageDto.setData(responseListObj);
         apiMessageDto.setMessage("List province success");

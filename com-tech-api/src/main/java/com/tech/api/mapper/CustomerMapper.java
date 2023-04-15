@@ -48,6 +48,8 @@ public interface CustomerMapper {
     @Mapping(source = "birthday", target = "birthday")
     @Mapping(source = "walletMoney", target = "walletMoney")
     @Mapping(source = "note", target = "note")
+    @Mapping(source = "loyaltyLevel", target = "loyaltyLevel")
+    @Mapping(source = "loyaltyPoint", target = "loyaltyPoint")
     CustomerDto fromCustomerEntityToDto(Customer customer);
 
     @Named("fromListCustomerEntityToListDtoMapper")
@@ -59,6 +61,8 @@ public interface CustomerMapper {
     @Mapping(source = "gender", target = "gender")
     @Mapping(source = "birthday", target = "birthday")
     @Mapping(source = "note", target = "note")
+    @Mapping(source = "loyaltyLevel", target = "loyaltyLevel")
+    @Mapping(source = "loyaltyPoint", target = "loyaltyPoint")
     @BeanMapping(ignoreByDefault = true)
     @Named("customerAutoCompleteMapping")
     CustomerDto fromEntityToAdminDtoAutoComplete(Customer customer);

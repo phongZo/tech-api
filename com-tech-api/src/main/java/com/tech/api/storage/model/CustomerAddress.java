@@ -33,6 +33,14 @@ public class CustomerAddress extends Auditable<String>{
 
     private Integer typeAddress;
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
+    private String province;
+
     @Column(name = "note")
     private String note;
 }

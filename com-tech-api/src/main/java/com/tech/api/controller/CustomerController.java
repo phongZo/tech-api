@@ -6,10 +6,10 @@ import com.tech.api.dto.ErrorCode;
 import com.tech.api.dto.ResponseListObj;
 import com.tech.api.dto.account.ForgetPasswordDto;
 import com.tech.api.dto.account.ValidateEmailDto;
-import com.tech.api.dto.customer.CustomerDto;
-import com.tech.api.dto.customer.CustomerPromotionDto;
+import com.tech.api.dto.customer.*;
 import com.tech.api.form.account.RequestValidateEmailForm;
 import com.tech.api.form.customer.*;
+import com.tech.api.form.promotion.CreatePromotionForm;
 import com.tech.api.form.wallet.RechargeForm;
 import com.tech.api.mapper.CustomerMapper;
 import com.tech.api.mapper.CustomerPromotionMapper;
@@ -22,7 +22,6 @@ import com.tech.api.storage.model.CustomerPromotion;
 import com.tech.api.storage.model.Group;
 import com.tech.api.storage.model.Promotion;
 import com.tech.api.storage.repository.*;
-import com.tech.api.dto.customer.CustomerAdminDto;
 import com.tech.api.exception.RequestException;
 import com.tech.api.storage.model.*;
 import com.tech.api.form.customer.*;
@@ -79,13 +78,44 @@ public class CustomerController extends ABasicController {
         return new ApiMessageDto<>(new ResponseListObj<>(customerDtoList, customerPage), "Get list successfully");
     }
 
+    @PostMapping(value = "/promotion/exchange", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<String> exchange(@Valid @RequestBody ExchangePromotionForm exchangePromotionForm, BindingResult bindingResult) {
+        if(!isCustomer()){
+            throw new RequestException(ErrorCode.PROMOTION_ERROR_UNAUTHORIZED, "Not allowed to create.");
+        }
+        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
+        Promotion promotion = promotionRepository.findById(exchangePromotionForm.getPromotionId()).orElse(null);
+        if(promotion == null || !promotion.getStatus().equals(Constants.STATUS_ACTIVE)){
+            throw new RequestException(ErrorCode.PROMOTION_ERROR_NOT_FOUND, "Not found promotion.");
+        }
+        Customer customer = getCurrentCustomer();
+        if(customer.getPoint() < promotion.getPoint()){
+            throw new RequestException(ErrorCode.PROMOTION_ERROR_NOT_FOUND, "Not found promotion.");
+        }
+        CustomerPromotion customerPromotion = new CustomerPromotion();
+        customerPromotion.setCustomer(customer);
+        customerPromotion.setPromotion(promotion);
+        customerPromotion.setIsInUse(false);
+
+        Date dt = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(dt);
+        c.add(Calendar.DATE, 7);
+        dt = c.getTime();
+        customerPromotion.setExpireDate(dt);
+        customerPromotionRepository.save(customerPromotion);
+        apiMessageDto.setMessage("Exchange promotion success");
+        return apiMessageDto;
+    }
+
     @GetMapping(value = "/promotion/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<ResponseListObj<CustomerPromotionDto>> clientListPromotion(CustomerPromotionCriteria criteria, BindingResult bindingResult) {
+    public ApiMessageDto<CustomerPromotionListObj> clientListPromotion(CustomerPromotionCriteria criteria, BindingResult bindingResult) {
         if(!isCustomer()){
             throw new RequestException(ErrorCode.CUSTOMER_ERROR_UNAUTHORIZED, "Not allowed to list promotion.");
         }
-        ApiMessageDto<ResponseListObj<CustomerPromotionDto>> apiMessageDto = new ApiMessageDto<>();
-        criteria.setCustomerId(getCurrentCustomer().getId());
+        Customer customer = getCurrentCustomer();
+        ApiMessageDto<CustomerPromotionListObj> apiMessageDto = new ApiMessageDto<>();
+        criteria.setCustomerId(customer.getId());
         criteria.setInUse(false);
         List<CustomerPromotion> list = customerPromotionRepository.findAll(criteria.getSpecification());
         List<CustomerPromotion> result = new ArrayList<>();
@@ -94,9 +124,10 @@ public class CustomerController extends ABasicController {
                 result.add(customerPromotion);
             }
         }
-        ResponseListObj<CustomerPromotionDto> responseListObj = new ResponseListObj<>();
-        responseListObj.setData(customerPromotionMapper.fromListCustomerPromotionEntityToListDtoMapper(result));
-        apiMessageDto.setData(responseListObj);
+        CustomerPromotionListObj obj = new CustomerPromotionListObj();
+        obj.setPoint(customer.getPoint());
+        obj.setData(customerPromotionMapper.fromListCustomerPromotionEntityToListDtoMapper(result));
+        apiMessageDto.setData(obj);
         apiMessageDto.setMessage("Get list success");
         return apiMessageDto;
     }

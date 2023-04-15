@@ -1,11 +1,14 @@
 package com.tech.api.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mapbox.geojson.Point;
+import com.mapbox.turf.TurfConstants;
+import com.mapbox.turf.TurfMeasurement;
 import com.tech.api.constant.Constants;
 import com.tech.api.dto.ApiMessageDto;
 import com.tech.api.form.orders.OrderPaymentForm;
 import com.tech.api.service.CommonApiService;
+import com.tech.api.service.MapboxService;
 import com.tech.api.storage.model.*;
 import com.tech.api.storage.repository.*;
 import com.tech.api.dto.ErrorCode;
@@ -32,13 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -95,6 +92,9 @@ public class OrdersController extends ABasicController{
 
     @Autowired
     CommonApiService landingIsApiService;
+
+    @Autowired
+    MapboxService mapboxService;
 
 
     @GetMapping(value = "/list",produces = MediaType.APPLICATION_JSON_VALUE)
@@ -163,6 +163,16 @@ public class OrdersController extends ABasicController{
         result.setData(ordersDto);
         result.setMessage("Get orders success");
         return result;
+    }
+
+    @PostMapping(value = "/archive", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional
+    @JsonIgnore
+    public ApiMessageDto<String> archiveOrder() {
+        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
+        ordersRepository.updateArchive();
+        apiMessageDto.setMessage("Success");
+        return apiMessageDto;
     }
 
 
@@ -234,12 +244,6 @@ public class OrdersController extends ABasicController{
             throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED, "Not allowed to create.");
         }
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-        Store store = checkStore(createOrdersForm);
-        if(!store.getIsAcceptOrder()){
-            apiMessageDto.setResult(false);
-            apiMessageDto.setMessage("Cửa hàng hiện không hoạt động");
-            return apiMessageDto;
-        }
         CustomerAddress address = checkAddress(createOrdersForm);
         CustomerPromotion promotion = null;
         if(createOrdersForm.getPromotionId() != null){
@@ -249,7 +253,6 @@ public class OrdersController extends ABasicController{
         List<OrdersDetail> ordersDetailList = ordersDetailMapper
                 .fromCreateOrdersDetailFormListToOrdersDetailList(createOrdersForm.getCreateOrdersDetailFormList());
         Orders orders = ordersMapper.fromCreateOrdersFormToEntity(createOrdersForm);
-        orders.setStore(store);
         orders.setAddress(address);
         setCustomerClient(orders,createOrdersForm);
         Double checkSaleOff = createOrdersForm.getSaleOff();
@@ -291,6 +294,10 @@ public class OrdersController extends ABasicController{
             promotion.setIsInUse(true);
             customerPromotionRepository.save(promotion);
         }
+        // choose store
+        selectStore(orders);
+
+        // find all store that have same city and 
         ordersRepository.save(orders);
 
         // remove cart item
@@ -302,12 +309,30 @@ public class OrdersController extends ABasicController{
         return apiMessageDto;
     }
 
-    private Store checkStore(CreateOrdersClientForm createOrdersForm) {
-        Store store = storeRepository.findById(createOrdersForm.getStoreId()).orElse(null);
-        if(store == null || !store.getStatus().equals(Constants.STATUS_ACTIVE)){
-            throw new RequestException(ErrorCode.STORE_ERROR_NOT_FOUND, "Not found store");
+    private void selectStore(Orders orders) {
+        List<Store> storeList = storeRepository.findAllByProvince(orders.getAddress().getProvince());
+        if(storeList == null || storeList.isEmpty()){
+            storeList = storeRepository.findAll();
         }
-        return store;
+        orders.setStore(getNearestStore(storeList, orders.getAddress()));
+    }
+
+    private Store getNearestStore(List<Store> storeList, CustomerAddress address) {
+        Point point = mapboxService.getPoint(address.getAddressDetails());
+        address.setLatitude(point.latitude());
+        address.setLongitude(point.longitude());
+        customerAddressRepository.save(address);
+
+        double minDistance = 10000;
+        Store nearestStore = null;
+        for (Store store : storeList){
+            double distance = mapboxService.distance(store.getLatitude(),store.getLongitude(),point.latitude(),point.longitude());
+            if(minDistance < distance){
+                minDistance = distance;
+                nearestStore = store;
+            }
+        }
+        return nearestStore;
     }
 
     private CustomerPromotion checkPromotion(CreateOrdersClientForm createOrdersForm) {
@@ -408,6 +433,20 @@ public class OrdersController extends ABasicController{
                 Integer soldAmount = productCheck.getSoldAmount() + 1;
                 productCheck.setSoldAmount(soldAmount);
                 productRepository.save(productCheck);
+            }
+            // update loyalty point and point
+            Customer customer = orders.getCustomer();
+            if(customer != null){
+                double orderPoint = orders.getTotalMoney() / 1000;
+                // up level
+                if((customer.getLoyaltyPoint() + orderPoint) >= Double.parseDouble(Constants.LOYALTY_MAX_POINT.split(",")[customer.getLoyaltyLevel()])){
+                    customer.setLoyaltyPoint((customer.getLoyaltyPoint() + orderPoint) - Double.parseDouble(Constants.LOYALTY_MAX_POINT.split(",")[customer.getLoyaltyLevel()]));
+                    customer.setLoyaltyLevel(customer.getLoyaltyLevel() + 1);
+                } else{
+                    customer.setLoyaltyPoint(customer.getLoyaltyPoint() + orderPoint);
+                }
+                customer.setPoint(customer.getPoint() + orderPoint);
+                customerRepository.save(customer);
             }
         }
         ordersRepository.save(orders);

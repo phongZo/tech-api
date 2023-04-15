@@ -22,4 +22,7 @@ public class Promotion extends Auditable<String>{
     private Integer kind;   // 1: money, 2:%
     private Double maxValueForPercent;    // if kind is % --> have max value in money
     private String value;
+
+    private Double point = 0d;
+    private Boolean exchangeable = false;
 }

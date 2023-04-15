@@ -5,6 +5,8 @@ import com.tech.api.form.promotion.CreatePromotionForm;
 import com.tech.api.storage.model.Promotion;
 import org.mapstruct.*;
 
+import java.util.List;
+
 @Mapper(
         componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
@@ -29,5 +31,10 @@ public interface PromotionMapper {
     @Mapping(source = "maxValueForPercent", target = "maxValueForPercent")
     @Mapping(source = "value", target = "value")
     @Mapping(source = "status", target = "status")
-    PromotionDto fromEntityToRankDto(Promotion promotion);
+    @Mapping(source = "exchangeable", target = "exchangeable")
+    @Mapping(source = "point", target = "point")
+    PromotionDto fromEntityToPromotionDto(Promotion promotion);
+
+    @IterableMapping(elementTargetType = PromotionDto.class, qualifiedByName = "fromEntityToDtoMapper")
+    List<PromotionDto> fromEntityListToPromotionListDto(List<Promotion> promotions);
 }
