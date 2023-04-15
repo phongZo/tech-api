@@ -1,5 +1,6 @@
 package com.tech.api.dto.customer;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tech.api.dto.account.AccountDto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -34,4 +35,7 @@ public class CustomerDto {
 
     @ApiModelProperty("addresses")
     private List<CustomerAddressDto> addresses;
+
+    private Integer loyaltyLevel;
+    private Double loyaltyPoint;
 }

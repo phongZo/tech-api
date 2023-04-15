@@ -11,4 +11,6 @@ public class PromotionDto extends ABasicAdminDto {
     private Integer kind;   // 1: money, 2:%
     private Double maxValueForPercent;    // if kind is % --> have max value in money
     private String value;
+    private double point;
+    private boolean exchangeable;
 }

@@ -44,6 +44,8 @@ public class Product extends Auditable<String> {
     @Column(name = "image")
     private String image;
 
+    private Integer totalInStock = 0;
+
     @Column(name = "is_sold_out")
     private Boolean isSoldOut = false;
 

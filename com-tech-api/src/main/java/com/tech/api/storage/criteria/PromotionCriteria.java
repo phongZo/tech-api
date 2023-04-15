@@ -13,6 +13,7 @@ import java.util.List;
 @Data
 public class PromotionCriteria {
     private Long id;
+    private Boolean exchangeable;
     public Specification<Promotion> getSpecification() {
         return new Specification<Promotion>() {
             private static final long seriatechersionUID = 1L;
@@ -22,6 +23,9 @@ public class PromotionCriteria {
 
                 if(getId() != null) {
                     predicates.add(cb.equal(root.get("id"), getId()));
+                }
+                if(getExchangeable() != null && getExchangeable()){
+                    predicates.add(cb.equal(root.get("exchangeable"), true));
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             }
