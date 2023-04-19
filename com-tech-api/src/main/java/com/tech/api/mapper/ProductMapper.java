@@ -42,6 +42,7 @@ public interface ProductMapper {
     @Mapping(source = "totalReview", target = "totalReview")
     @Mapping(source = "soldAmount", target = "soldAmount")
     @Mapping(source = "price", target = "price")
+    @Mapping(source = "totalInStock", target = "totalInStock")
     @BeanMapping(ignoreByDefault = true)
     @Named("clientGetMapping")
     ProductDto fromEntityToClientDto(Product product);
@@ -72,16 +73,17 @@ public interface ProductMapper {
     @Mapping(source = "name", target = "name")
     @Mapping(source = "image", target = "image")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
-    ProductDto fromProductEntityToDtoAutoComplete(Product product);
+    @Mapping(source = "status", target = "status")
+    @Mapping(source = "price", target = "price")
+    ProductAdminDto fromProductEntityToDtoAutoComplete(Product product);
 
-    @Named("fromProductEntityListToDtoListAutoCompleteMapper")
-    @IterableMapping(elementTargetType = ProductDto.class, qualifiedByName = "fromProductEntityToDtoAutoCompleteMapper")
-    List<ProductDto> fromProductEntityListToDtoListAutoComplete(List<Product> products);
+    @Named("fromProductEntityListToAdminDtoListMapper")
+    @IterableMapping(elementTargetType = ProductAdminDto.class, qualifiedByName = "fromProductEntityToDtoAutoCompleteMapper")
+    List<ProductAdminDto> fromProductEntityListToAdminDtoList(List<Product> products);
 
     @Named("fromProductEntityToDtoDetails")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "category.id", target = "productCategoryId")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")
@@ -98,12 +100,13 @@ public interface ProductMapper {
     @Mapping(source = "isSaleOff", target = "isSaleOff")
     @Mapping(source = "saleOff", target = "saleOff")
     @Mapping(source = "image", target = "image")
+    @Mapping(source = "description", target = "description")
+    @Mapping(source = "category.name", target = "productCategoryName")
+    @Mapping(source = "totalInStock", target = "totalInStock")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
+    @Mapping(source = "productConfigs", target = "productConfigs", qualifiedByName = "fromProductConfigEntityListToDtoListMapper")
     ProductAdminDto fromProductEntityToAdminDto(Product product);
 
-    @Named("fromProductEntityListToAdminDtoListMapper")
-    @IterableMapping(elementTargetType = ProductAdminDto.class, qualifiedByName = "fromProductEntityToAdminDtoMapper")
-    List<ProductAdminDto> fromProductEntityListToAdminDtoList(List<Product> products);
 
     @Named("fromUpdateProductFormToEntityMapper")
     @BeanMapping(ignoreByDefault = true)

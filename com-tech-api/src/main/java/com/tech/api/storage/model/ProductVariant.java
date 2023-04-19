@@ -20,11 +20,17 @@ public class ProductVariant extends Auditable<String> {
     @Column(name = "price")
     private Double price;
 
+    @Column(name = "color")
+    private String color;
+
     @Column(name = "description")
     private String description;
 
     @Column(name = "image")
     private String image;
+
+    @Column(name = "total_in_stock")
+    private Integer totalInStock;
 
     @ManyToOne(targetEntity = ProductConfig.class)
     @JoinColumn(name = "product_config_id", insertable = false, updatable = false)

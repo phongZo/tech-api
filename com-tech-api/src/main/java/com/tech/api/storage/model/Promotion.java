@@ -23,6 +23,8 @@ public class Promotion extends Auditable<String>{
     private Double maxValueForPercent;    // if kind is % --> have max value in money
     private String value;
 
-    private Double point = 0d;
+    @Column(name = "loyalty_level")
+    private Integer loyaltyLevel;
+    private Double point;
     private Boolean exchangeable = false;
 }

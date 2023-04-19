@@ -37,6 +37,8 @@ public class ProductDto {
     @ApiModelProperty(name = "image")
     private String image;
 
+    private Integer totalInStock;
+
     @ApiModelProperty(name = "isSoldOut")
     private Boolean isSoldOut;
 

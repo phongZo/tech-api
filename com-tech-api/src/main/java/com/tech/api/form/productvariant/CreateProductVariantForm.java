@@ -29,4 +29,6 @@ public class CreateProductVariantForm {
     @Status
     @ApiModelProperty(name = "status")
     private Integer status = 1;
+
+    private String color;
 }
