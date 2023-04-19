@@ -82,7 +82,9 @@ public class ProductController extends ABasicController {
             List<ProductDto> dto = new ArrayList<>();
             for (Product product : productList){
                 ProductDto productDto = productMapper.fromEntityToClientDto(product);
-                productDto.setIsLike(true);
+                if(product.getCustomersLiked().contains(customerCheck)){
+                    productDto.setIsLike(true);
+                }
                 dto.add(productDto);
             }
             responseListObj.setData(dto);

@@ -46,11 +46,6 @@ public class ProductCriteria {
                 Join<Product, ProductCategory> productCategoryJoin = root.join("category", JoinType.INNER);
                 predicates.add(cb.equal(productCategoryJoin.get("id"), getCategoryId()));
             }
-            if(getCustomerId() != null){
-                Join<Product, Customer> productCustomerJoin = root.join("customersLiked", JoinType.INNER);
-                predicates.add(cb.equal(productCustomerJoin.get("id"), getCustomerId()));
-                criteriaQuery.distinct(true);
-            }
 
             if (getDescription() != null) {
                 predicates.add(cb.like(cb.lower(root.get("description")), "%" + getDescription().toLowerCase() + "%"));
