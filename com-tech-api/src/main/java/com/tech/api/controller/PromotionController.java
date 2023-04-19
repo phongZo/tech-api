@@ -14,6 +14,8 @@ import com.tech.api.storage.repository.CustomerRepository;
 import com.tech.api.storage.repository.PromotionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -42,8 +44,14 @@ public class PromotionController extends ABasicController{
         }
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
         Promotion promotion = promotionMapper.fromCreateFormToEntity(createPromotionForm);
+        if(promotion.getExchangeable() && promotion.getPoint() == null){
+            throw new RequestException(ErrorCode.PROMOTION_ERROR_BAD_REQUEST, "Please fill the point.");
+        }
+        if(!promotion.getExchangeable() && promotion.getLoyaltyLevel() == null){
+            throw new RequestException(ErrorCode.PROMOTION_ERROR_BAD_REQUEST, "Please fill the loyalty level.");
+        }
         if(promotion.getKind().equals(Constants.PROMOTION_KIND_PERCENT)){
-            Integer value = Integer.valueOf(promotion.getValue());
+            int value = Integer.parseInt(promotion.getValue());
             if(value < 0 || value > 100){
                 throw new RequestException(ErrorCode.PROMOTION_ERROR_BAD_REQUEST, "Value invalid.");
             }
@@ -54,6 +62,24 @@ public class PromotionController extends ABasicController{
         }
         promotionRepository.save(promotion);
         apiMessageDto.setMessage("Create promotion success");
+        return apiMessageDto;
+    }
+
+    @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<ResponseListObj<PromotionDto>> list(PromotionCriteria criteria, Pageable pageable) {
+        if(!isAdmin()){
+            throw new RequestException(ErrorCode.PROMOTION_ERROR_UNAUTHORIZED, "Not allowed to list promotion.");
+        }
+        ApiMessageDto<ResponseListObj<PromotionDto>> apiMessageDto = new ApiMessageDto<>();
+        Page<Promotion> list = promotionRepository.findAll(criteria.getSpecification(), pageable);
+        ResponseListObj<PromotionDto> responseListObj = new ResponseListObj<>();
+        responseListObj.setData(promotionMapper.fromEntityListToPromotionListDto(list.getContent()));
+        responseListObj.setPage(list.getTotalPages());
+        responseListObj.setTotalElements(list.getTotalElements());
+        responseListObj.setTotalPage(list.getTotalPages());
+
+        apiMessageDto.setData(responseListObj);
+        apiMessageDto.setMessage("Get list success");
         return apiMessageDto;
     }
 

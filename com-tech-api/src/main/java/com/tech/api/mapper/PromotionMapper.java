@@ -20,6 +20,9 @@ public interface PromotionMapper {
     @Mapping(source = "kind", target = "kind")
     @Mapping(source = "maxValueForPercent", target = "maxValueForPercent")
     @Mapping(source = "value", target = "value")
+    @Mapping(source = "loyaltyLevel", target = "loyaltyLevel")
+    @Mapping(source = "exchangeable", target = "exchangeable")
+    @Mapping(source = "point", target = "point")
     Promotion fromCreateFormToEntity(CreatePromotionForm createPromotionForm);
 
     @Named("fromEntityToDtoMapper")

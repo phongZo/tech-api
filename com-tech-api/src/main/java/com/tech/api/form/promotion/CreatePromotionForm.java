@@ -1,5 +1,6 @@
 package com.tech.api.form.promotion;
 
+import com.tech.api.validation.LoyaltyLevel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -25,4 +26,12 @@ public class CreatePromotionForm {
     @NotEmpty(message = "value cannot be empty")
     @ApiModelProperty(required = true)
     private String value;
+
+    @LoyaltyLevel
+    private Integer loyaltyLevel;
+
+    @NotNull(message = "exchangeable cannot be empty")
+    @ApiModelProperty(required = true)
+    private Boolean exchangeable;       // if false --> need loyaltyLevel (as a give)
+    private double point;
 }

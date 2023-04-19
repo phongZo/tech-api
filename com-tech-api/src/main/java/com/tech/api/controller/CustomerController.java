@@ -100,7 +100,7 @@ public class CustomerController extends ABasicController {
         Date dt = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(dt);
-        c.add(Calendar.DATE, 7);
+        c.add(Calendar.MONTH, 1);
         dt = c.getTime();
         customerPromotion.setExpireDate(dt);
         customerPromotionRepository.save(customerPromotion);

@@ -23,4 +23,8 @@ public class ProductVariantDto {
     @ApiModelProperty(name = "image")
     private String image;
 
+    private Integer totalInStock;
+
+    private String color;
+
 }

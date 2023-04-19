@@ -23,6 +23,7 @@ public interface ProductVariantMapper {
     @Mapping(source = "image", target = "image")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "status", target = "status")
+    @Mapping(source = "color", target = "color")
     ProductVariant fromCreateProductVariantFormToEntity(CreateProductVariantForm createProductVariantForm);
 
     @Named("fromCreateProductVariantFormListToEntityListMapper")
@@ -33,6 +34,8 @@ public interface ProductVariantMapper {
     @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "id", target = "id")
     @Mapping(source = "name", target = "name")
+    @Mapping(source = "totalInStock", target = "totalInStock")
+    @Mapping(source = "color", target = "color")
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
     @Mapping(source = "description", target = "description")

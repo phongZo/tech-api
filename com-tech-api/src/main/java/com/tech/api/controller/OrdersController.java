@@ -96,6 +96,11 @@ public class OrdersController extends ABasicController{
     @Autowired
     MapboxService mapboxService;
 
+    @Autowired
+    PromotionRepository promotionRepository;
+
+    @Autowired
+    StockRepository stockRepository;
 
     @GetMapping(value = "/list",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<OrdersDto>> list(OrdersCriteria ordersCriteria, Pageable pageable){
@@ -262,12 +267,7 @@ public class OrdersController extends ABasicController{
         orders.setCode(generateCode());
         orders.setState(Constants.ORDERS_STATE_CREATED);
 
-        // calculate amount item
-        Integer amount = 0;
-        for (OrdersDetail detail : ordersDetailList){
-            amount += detail.getAmount();
-        }
-        orders.setAmount(amount);
+
         orders.setExpectedReceiveDate(LocalDate.from(convertToLocalDateViaInstant(new Date())).plusDays(7));
         Orders savedOrder = ordersRepository.save(orders);
         /*-----------------------Xử lý orders detail------------------ */
@@ -297,7 +297,8 @@ public class OrdersController extends ABasicController{
         // choose store
         selectStore(orders);
 
-        // find all store that have same city and 
+        // update each product in stock
+        updateStock(ordersDetailList,orders);
         ordersRepository.save(orders);
 
         // remove cart item
@@ -307,6 +308,36 @@ public class OrdersController extends ABasicController{
         cartRepository.save(cart);
         apiMessageDto.setMessage("Create orders success");
         return apiMessageDto;
+    }
+
+    private void updateStock(List<OrdersDetail> ordersDetailList, Orders orders) {
+        for (OrdersDetail detail : ordersDetailList){
+
+            ProductVariant variant = productVariantRepository.findById(detail.getProductVariant().getId()).orElse(null);
+            if(variant == null){
+                throw new RequestException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND, "product variant not existed");
+            }
+            Product productCheck = productRepository.findById(variant.getProductConfig().getProduct().getId()).orElse(null);
+            if (productCheck == null){
+                throw new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "product is not existed");
+            }
+
+            // update in stock of store
+            Stock stock = stockRepository.findFirstByProductVariantIdAndStoreId(variant.getId(), orders.getStore().getId());
+            if(stock != null && stock.getTotal() != null && stock.getTotal() >= detail.getAmount()) {
+                stock.setTotal(stock.getTotal() - detail.getAmount());
+                stockRepository.save(stock);
+            }
+
+            // update general variant
+            if(variant.getTotalInStock() >= detail.getAmount()){
+                variant.setTotalInStock(variant.getTotalInStock() - detail.getAmount());
+                productVariantRepository.save(variant);
+            }
+
+            productCheck.setTotalInStock(productCheck.getTotalInStock() - detail.getAmount());
+            productRepository.save(productCheck);
+        }
     }
 
     private void selectStore(Orders orders) {
@@ -442,6 +473,25 @@ public class OrdersController extends ABasicController{
                 if((customer.getLoyaltyPoint() + orderPoint) >= Double.parseDouble(Constants.LOYALTY_MAX_POINT.split(",")[customer.getLoyaltyLevel()])){
                     customer.setLoyaltyPoint((customer.getLoyaltyPoint() + orderPoint) - Double.parseDouble(Constants.LOYALTY_MAX_POINT.split(",")[customer.getLoyaltyLevel()]));
                     customer.setLoyaltyLevel(customer.getLoyaltyLevel() + 1);
+
+                    // Give vouchers of level upgraded
+                    List<Promotion> promotions = promotionRepository.findAllByLoyaltyLevel(customer.getLoyaltyLevel());
+                    List<CustomerPromotion> customerPromotionList = new ArrayList<>();
+                    for (Promotion promotion : promotions){
+                        CustomerPromotion customerPromotion = new CustomerPromotion();
+                        customerPromotion.setPromotion(promotion);
+                        customerPromotion.setCustomer(customer);
+                        customerPromotion.setIsInUse(false);
+
+                        Date dt = new Date();
+                        Calendar c = Calendar.getInstance();
+                        c.setTime(dt);
+                        c.add(Calendar.MONTH, 2);
+                        dt = c.getTime();
+                        customerPromotion.setExpireDate(dt);
+                        customerPromotionList.add(customerPromotion);
+                    }
+                    customerPromotionRepository.saveAll(customerPromotionList);
                 } else{
                     customer.setLoyaltyPoint(customer.getLoyaltyPoint() + orderPoint);
                 }
@@ -458,7 +508,10 @@ public class OrdersController extends ABasicController{
     private void amountPriceCal(Orders orders,List<OrdersDetail> ordersDetailList, Orders savedOrder, CustomerPromotion promotion) {
         int checkIndex = 0;
         double amountPrice = 0.0;
+        // calculate amount item
+        Integer amount = 0;
         for (OrdersDetail ordersDetail : ordersDetailList){
+            amount += ordersDetail.getAmount();
             ProductVariant variant = productVariantRepository.findById(ordersDetail.getProductVariant().getId()).orElse(null);
             if(variant == null){
                 throw new RequestException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND, "product variant not existed");
@@ -476,6 +529,7 @@ public class OrdersController extends ABasicController{
             ordersDetail.setOrders(savedOrder);
             checkIndex++;
         }
+        orders.setAmount(amount);
         amountPrice += Constants.DEFAULT_DELIVERY_FEE;
         Double totalMoney = totalMoneyHaveToPay(amountPrice,orders,promotion);
         orders.setSaleOffMoney(amountPrice - totalMoney);

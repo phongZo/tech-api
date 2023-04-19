@@ -134,14 +134,6 @@ public class ProductController extends ABasicController {
         return customer;
     }
 
-    @GetMapping(value = "/auto-complete", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<ResponseListObj<ProductDto>> autoComplete(@Valid ProductCriteria productCriteria) {
-        Page<Product> productPage = productRepository.findAll(productCriteria.getSpecification(), Pageable.unpaged());
-        List<ProductDto> productDtoList = productMapper.fromProductEntityListToDtoListAutoComplete(productPage.getContent());
-        return new ApiMessageDto<>(
-                new ResponseListObj<>(productDtoList), "Get list successfully"
-        );
-    }
 
     @GetMapping(value = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ProductAdminDto> get(@PathVariable(name = "id") Long id) {
@@ -155,7 +147,7 @@ public class ProductController extends ABasicController {
     public ApiMessageDto<ProductDto> clientGet(@PathVariable(name = "id") Long id, @RequestParam(value = "customerId",required = false) Long customerId) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Product not found"));
-        ProductDto productDto = productMapper.fromProductEntityToDto(product);
+        ProductDto productDto = productMapper.fromProductEntityToDtoDetails(product);
         if (customerId != null){
             List<Long> listId = new ArrayList<>();
             for (Customer customer : product.getCustomersLiked()){

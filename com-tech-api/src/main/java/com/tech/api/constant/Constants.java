@@ -12,6 +12,13 @@ public class Constants {
     public static final Integer USER_KIND_EMPLOYEE = 3;
     public static final Integer USER_KIND_COLLABORATOR = 4;
 
+    public static final int LOYALTY_LEVEL_BRONZE = 0;
+    public static final int LOYALTY_LEVEL_SILVER = 1;
+    public static final int LOYALTY_LEVEL_GOLD = 2;
+    public static final int LOYALTY_LEVEL_PLATINUM = 3;
+    public static final int LOYALTY_LEVEL_DIAMOND = 4;
+    public static final int LOYALTY_LEVEL_ROYAL = 5;
+
     public static final String LOYALTY_MAX_POINT = "4000,12000,25000,40000,60000,100000";
 
     public static final Integer STATUS_ACTIVE = 1;

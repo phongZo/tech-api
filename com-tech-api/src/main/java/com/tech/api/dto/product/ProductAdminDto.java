@@ -15,6 +15,11 @@ public class ProductAdminDto extends ABasicAdminDto {
     @ApiModelProperty(name = "productCategoryId")
     private Long productCategoryId;
 
+    @ApiModelProperty(name = "productCategoryName")
+    private String productCategoryName;
+
+    private Integer totalInStock;
+
     @ApiModelProperty(name = "description")
     private String description;
 
