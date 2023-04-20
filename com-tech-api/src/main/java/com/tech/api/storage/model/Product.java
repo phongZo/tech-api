@@ -59,7 +59,7 @@ public class Product extends Auditable<String> {
     List<ProductConfig> productConfigs = new ArrayList<>();
 
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @ManyToMany()
     @JoinTable(name = TablePrefix.PREFIX_TABLE+"customer_favorites",
             joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "customer_id",

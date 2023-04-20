@@ -109,7 +109,7 @@ public class ProductController extends ABasicController {
         }
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
         Product product = productRepository.findById(updateFavoriteForm.getProductId()).orElse(null);
-        if(product == null || product.getIsSoldOut()|| !product.getStatus().equals(Constants.STATUS_ACTIVE)){
+        if(product == null || !product.getStatus().equals(Constants.STATUS_ACTIVE)){
             throw new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Not found product.");
         }
         Customer customer = getCurrentCustomer();
