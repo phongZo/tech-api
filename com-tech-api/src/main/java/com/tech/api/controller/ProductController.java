@@ -87,10 +87,12 @@ public class ProductController extends ABasicController {
                         .anyMatch(customer -> customer.getId().equals(finalCustomerCheck.getId()))){
                     productDto.setIsLike(true);
                     dto.add(productDto);
+                    continue;
                 }
-                if(!productCriteria.getIsLike()){
-                    dto.add(productDto);
+                if(productCriteria.getIsLike() != null && productCriteria.getIsLike()){
+                    continue;
                 }
+                dto.add(productDto);
             }
             responseListObj.setData(dto);
         }
