@@ -30,6 +30,7 @@ public class ProductCriteria {
     private Boolean isSoldOut;
     private Long parentProduct;
     private Long customerId;
+    private Boolean isLike;
     @ProductKind
     private Integer kind;
     private List<String> variantNames;

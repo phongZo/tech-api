@@ -86,8 +86,11 @@ public class ProductController extends ABasicController {
                 if(product.getCustomersLiked().stream()
                         .anyMatch(customer -> customer.getId().equals(finalCustomerCheck.getId()))){
                     productDto.setIsLike(true);
+                    dto.add(productDto);
                 }
-                dto.add(productDto);
+                if(!productCriteria.getIsLike()){
+                    dto.add(productDto);
+                }
             }
             responseListObj.setData(dto);
         }
