@@ -59,6 +59,7 @@ public interface ProductMapper {
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
+    @Mapping(source = "isSaleOff", target = "isSaleOff")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
     @Mapping(source = "parentProduct.id", target = "parentProductId")
     ProductDto fromProductEntityToDto(Product product);
