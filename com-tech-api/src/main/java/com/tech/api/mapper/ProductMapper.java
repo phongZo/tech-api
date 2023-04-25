@@ -42,7 +42,6 @@ public interface ProductMapper {
     @Mapping(source = "totalReview", target = "totalReview")
     @Mapping(source = "soldAmount", target = "soldAmount")
     @Mapping(source = "price", target = "price")
-    @Mapping(source = "totalInStock", target = "totalInStock")
     @BeanMapping(ignoreByDefault = true)
     @Named("clientGetMapping")
     ProductDto fromEntityToClientDto(Product product);
@@ -96,6 +95,7 @@ public interface ProductMapper {
     ProductDto fromProductEntityToDtoDetails(Product product);
 
     @Named("fromProductEntityToAdminDtoMapper")
+    @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "id", target = "id")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")

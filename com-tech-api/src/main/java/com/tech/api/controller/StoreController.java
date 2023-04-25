@@ -49,6 +49,13 @@ public class StoreController extends ABasicController {
         return new ApiMessageDto<>(new ResponseListObj<>(storeDtoList, storePage), "Get list successfully");
     }
 
+    @GetMapping(value = "/client-list", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<ResponseListObj<StoreDto>> clientList(StoreCriteria storeCriteria, Pageable pageable) {
+        Page<Store> storePage = storeRepository.findAll(storeCriteria.getSpecification(), pageable);
+        List<StoreDto> storeDtoList = storeMapper.fromStoreEntityListToDtoList(storePage.getContent());
+        return new ApiMessageDto<>(new ResponseListObj<>(storeDtoList, storePage), "Get list successfully");
+    }
+
     @GetMapping(value = "/auto-complete", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<List<StoreDto>> autoComplete(StoreCriteria storeCriteria) {
         Page<Store> storePage = storeRepository.findAll(storeCriteria.getSpecification(), Pageable.unpaged());

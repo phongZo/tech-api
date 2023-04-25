@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface Gender{
     boolean allowNull() default true;
-    String message() default "Province kind invalid.";
+    String message() default "Gender invalid.";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }
