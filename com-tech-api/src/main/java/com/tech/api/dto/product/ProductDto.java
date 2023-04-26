@@ -1,6 +1,7 @@
 package com.tech.api.dto.product;
 
 import com.tech.api.dto.productconfig.ProductConfigDto;
+import com.tech.api.dto.productvariant.VariantStockDto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -51,4 +52,6 @@ public class ProductDto {
 
     @ApiModelProperty(name = "productConfigs")
     private List<ProductConfigDto> productConfigs;
+
+    private List<VariantStockDto> stockDtoList;
 }

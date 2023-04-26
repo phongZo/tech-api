@@ -83,6 +83,19 @@ public class PromotionController extends ABasicController{
         return apiMessageDto;
     }
 
+    @GetMapping(value = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<PromotionDto> get(@PathVariable("id") Long id) {
+        if(!isAdmin()){
+            throw new RequestException(ErrorCode.PROMOTION_ERROR_UNAUTHORIZED, "Not allowed to get promotion.");
+        }
+        ApiMessageDto<PromotionDto> apiMessageDto = new ApiMessageDto<>();
+        Promotion promotion = promotionRepository.findById(id).orElseThrow(
+                () -> new RequestException(ErrorCode.PROMOTION_ERROR_NOT_FOUND, "Not found promotion"));
+        apiMessageDto.setData(promotionMapper.fromEntityToPromotionDto(promotion));
+        apiMessageDto.setMessage("Get list success");
+        return apiMessageDto;
+    }
+
     @GetMapping(value = "/client-list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<PromotionDto>> clientListPromotion(PromotionCriteria criteria, BindingResult bindingResult) {
         if(!isCustomer()){

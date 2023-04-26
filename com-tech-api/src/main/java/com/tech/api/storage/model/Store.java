@@ -33,5 +33,7 @@ public class Store extends Auditable<String> {
     @Column(name = "is_accept_order")
     private Boolean isAcceptOrder;
 
+    private String phone;
+
     private String province;
 }
