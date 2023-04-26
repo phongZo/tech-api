@@ -6,6 +6,8 @@ import com.tech.api.dto.ErrorCode;
 import com.tech.api.dto.ResponseListObj;
 import com.tech.api.dto.product.ProductAdminDto;
 import com.tech.api.dto.product.ProductDto;
+import com.tech.api.dto.productvariant.ProductVariantDto;
+import com.tech.api.dto.productvariant.VariantStockDto;
 import com.tech.api.form.product.UpdateFavoriteForm;
 import com.tech.api.form.product.UpdateProductForm;
 import com.tech.api.form.product.UpdateSellStatusForm;
@@ -21,6 +23,7 @@ import com.tech.api.exception.RequestException;
 import com.tech.api.form.product.CreateProductForm;
 import com.tech.api.storage.model.*;
 import com.tech.api.storage.repository.ProductCategoryRepository;
+import com.tech.api.storage.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +47,9 @@ public class ProductController extends ABasicController {
     private final ProductCategoryRepository productCategoryRepository;
     private final ProductMapper productMapper;
     private final CommonApiService commonApiService;
+
+    @Autowired
+    StockRepository stockRepository;
 
     @Autowired
     CustomerRepository customerRepository;
@@ -165,6 +171,13 @@ public class ProductController extends ABasicController {
             if(listId.contains(customerId)){
                 productDto.setIsLike(true);
             }
+        }
+        if (!productDto.getProductConfigs().isEmpty()){
+            List<Long> variantListId = new ArrayList<>();
+            for (ProductVariantDto variantDto : productDto.getProductConfigs().get(0).getVariants()){
+                variantListId.add(variantDto.getId());
+            }
+            productDto.setStockDtoList(stockRepository.findAllStocksHaveVariant(variantListId));
         }
         return new ApiMessageDto<>(productDto, "Get product successfully");
     }

@@ -34,7 +34,6 @@ public interface ProductVariantMapper {
     @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "id", target = "id")
     @Mapping(source = "name", target = "name")
-    @Mapping(source = "totalInStock", target = "totalInStock")
     @Mapping(source = "color", target = "color")
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")

@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class ProductVariantDto {
@@ -23,7 +25,7 @@ public class ProductVariantDto {
     @ApiModelProperty(name = "image")
     private String image;
 
-    private Integer totalInStock;
+    private List<VariantStockDto> variantStockDtoList;
 
     private String color;
 
