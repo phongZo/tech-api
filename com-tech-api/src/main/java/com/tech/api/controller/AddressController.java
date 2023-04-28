@@ -76,6 +76,22 @@ public class AddressController extends ABasicController{
         return result;
     }
 
+    @GetMapping(value = "/client-get-default", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<CustomerAddressDto> clientGet() {
+        if(!isCustomer()){
+            throw new RequestException(ErrorCode.CUSTOMER_ADDRESS_ERROR_UNAUTHORIZED, "Not allowed get.");
+        }
+        ApiMessageDto<CustomerAddressDto> result = new ApiMessageDto<>();
+        CustomerAddress address = addressRepository.findCustomerAddressByCustomerIdAndIsDefault(getCurrentCustomer().getId(),true);
+        if(address == null) {
+            throw new RequestException(ErrorCode.CUSTOMER_ADDRESS_ERROR_NOT_FOUND, "Not found address.");
+        }
+        CustomerAddressDto addressDto = addressMapper.fromEntityToDto(address);
+        result.setData(addressDto);
+        result.setMessage("Get address success");
+        return result;
+    }
+
 
     @PostMapping(value = "/client-create", produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
