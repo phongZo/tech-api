@@ -37,6 +37,7 @@ public interface ProductVariantMapper {
     @Mapping(source = "color", target = "color")
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
+    @Mapping(source = "status", target = "status")
     @Mapping(source = "description", target = "description")
     ProductVariantDto fromProductVariantEntityToDto(ProductVariant productVariant);
 

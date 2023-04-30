@@ -19,4 +19,6 @@ public class ProductConfigDto {
 
     @ApiModelProperty(name = "variants")
     private List<ProductVariantDto> variants;
+
+    private Integer status;
 }
