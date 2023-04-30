@@ -32,6 +32,7 @@ public interface ProductConfigMapper {
     @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "id", target = "id")
     @Mapping(source = "name", target = "name")
+    @Mapping(source = "status", target = "status")
     @Mapping(source = "variants", target = "variants", qualifiedByName = "fromProductVariantEntityListToDtoListMapper")
     ProductConfigDto fromProductConfigEntityToDto(ProductConfig productConfig);
 

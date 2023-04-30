@@ -106,6 +106,7 @@ public interface ProductMapper {
     @Mapping(source = "category.name", target = "productCategoryName")
     @Mapping(source = "totalInStock", target = "totalInStock")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
+    @Mapping(source = "status", target = "status")
     @Mapping(source = "productConfigs", target = "productConfigs", qualifiedByName = "fromProductConfigEntityListToDtoListMapper")
     ProductAdminDto fromProductEntityToAdminDto(Product product);
 

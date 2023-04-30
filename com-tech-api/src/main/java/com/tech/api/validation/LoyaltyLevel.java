@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = LoyaltyLevelValidation.class)
 @Documented
 public @interface LoyaltyLevel {
-    boolean allowNull() default false;
+    boolean allowNull() default true;
     String message() default  "Loyalty level invalid.";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
