@@ -19,6 +19,11 @@ public class CreateOrdersClientForm {
     @ApiModelProperty(required = true)
     private Integer paymentMethod;
 
+    @NotNull(message = "storeId cannot be empty")
+    @ApiModelProperty(required = true)
+    private Long storeId;
+
+
     private Long promotionId;
     private Double saleOff = 0d;
 

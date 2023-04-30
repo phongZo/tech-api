@@ -18,9 +18,7 @@ public interface StoreMapper {
     @Named("fromCreateStoreFormToEntityMapper")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "name", target = "name")
-    @Mapping(source = "isAcceptOrder", target = "isAcceptOrder")
-    @Mapping(source = "posId", target = "posId")
-    @Mapping(source = "sessionId", target = "sessionId")
+    @Mapping(source = "phone", target = "phone")
     @Mapping(source = "latitude", target = "latitude")
     @Mapping(source = "longitude", target = "longitude")
     @Mapping(source = "addressDetails", target = "addressDetails")
@@ -29,11 +27,11 @@ public interface StoreMapper {
     @Named("fromStoreEntityToDto")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "isAcceptOrder", target = "isAcceptOrder")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "latitude", target = "latitude")
     @Mapping(source = "longitude", target = "longitude")
     @Mapping(source = "addressDetails", target = "addressDetails")
+    @Mapping(source = "phone", target = "phone")
     StoreDto fromStoreEntityToDto(Store store);
 
     @Named("fromStoreEntityListToDtoListMapper")
@@ -46,5 +44,6 @@ public interface StoreMapper {
     @Mapping(source = "latitude", target = "latitude")
     @Mapping(source = "longitude", target = "longitude")
     @Mapping(source = "addressDetails", target = "addressDetails")
+    @Mapping(source = "phone", target = "phone")
     void fromUpdateStoreFormToEntity(UpdateStoreForm updateStoreForm, @MappingTarget Store store);
 }
