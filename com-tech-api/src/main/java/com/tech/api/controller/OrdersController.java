@@ -249,6 +249,12 @@ public class OrdersController extends ABasicController{
             throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED, "Not allowed to create.");
         }
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
+        Store store = checkStore(createOrdersForm);
+        if(!store.getStatus().equals(Constants.STATUS_ACTIVE)){
+            apiMessageDto.setResult(false);
+            apiMessageDto.setMessage("Cửa hàng hiện không hoạt động");
+            return apiMessageDto;
+        }
         CustomerAddress address = checkAddress(createOrdersForm);
         CustomerPromotion promotion = null;
         if(createOrdersForm.getPromotionId() != null){
@@ -258,6 +264,7 @@ public class OrdersController extends ABasicController{
         List<OrdersDetail> ordersDetailList = ordersDetailMapper
                 .fromCreateOrdersDetailFormListToOrdersDetailList(createOrdersForm.getCreateOrdersDetailFormList());
         Orders orders = ordersMapper.fromCreateOrdersFormToEntity(createOrdersForm);
+        orders.setStore(store);
         orders.setAddress(address);
         setCustomerClient(orders,createOrdersForm);
         Double checkSaleOff = createOrdersForm.getSaleOff();
@@ -295,7 +302,7 @@ public class OrdersController extends ABasicController{
             customerPromotionRepository.save(promotion);
         }
         // choose store
-        selectStore(orders);
+        //selectStore(orders);
 
         // update each product in stock
         updateStock(ordersDetailList,orders);
@@ -308,6 +315,14 @@ public class OrdersController extends ABasicController{
         cartRepository.save(cart);
         apiMessageDto.setMessage("Create orders success");
         return apiMessageDto;
+    }
+
+    private Store checkStore(CreateOrdersClientForm createOrdersForm) {
+        Store store = storeRepository.findById(createOrdersForm.getStoreId()).orElse(null);
+        if(store == null || !store.getStatus().equals(Constants.STATUS_ACTIVE)){
+            throw new RequestException(ErrorCode.STORE_ERROR_NOT_FOUND, "Not found store");
+        }
+        return store;
     }
 
     private void updateStock(List<OrdersDetail> ordersDetailList, Orders orders) {

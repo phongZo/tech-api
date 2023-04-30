@@ -8,6 +8,7 @@ import com.tech.api.dto.ResponseListObj;
 import com.tech.api.dto.store.StoreDto;
 import com.tech.api.dto.store.VerifyStoreDto;
 import com.tech.api.exception.RequestException;
+import com.tech.api.form.store.UpdateStoreForm;
 import com.tech.api.form.store.UpdateStoreStatusForm;
 import com.tech.api.form.store.VerifyDeviceForm;
 import com.tech.api.intercepter.MyAuthentication;
@@ -51,6 +52,7 @@ public class StoreController extends ABasicController {
 
     @GetMapping(value = "/client-list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<StoreDto>> clientList(StoreCriteria storeCriteria, Pageable pageable) {
+        storeCriteria.setClientSide(true);
         Page<Store> storePage = storeRepository.findAll(storeCriteria.getSpecification(), pageable);
         List<StoreDto> storeDtoList = storeMapper.fromStoreEntityListToDtoList(storePage.getContent());
         return new ApiMessageDto<>(new ResponseListObj<>(storeDtoList, storePage), "Get list successfully");
@@ -125,44 +127,31 @@ public class StoreController extends ABasicController {
             throw new RequestException(ErrorCode.STORE_ERROR_UNAUTHORIZED, "Not allowed to create.");
         }
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-
-        //check pos id unique
-        Store store = storeRepository.findByPosId(createStoreForm.getPosId());
-        if(store != null){
-            throw new RequestException(ErrorCode.STORE_ERROR_BAD_REQUEST, "Store existed.");
-        }
-
-        store = storeMapper.fromCreateStoreFormToEntity(createStoreForm);
+        Store store = storeMapper.fromCreateStoreFormToEntity(createStoreForm);
         storeRepository.save(store);
         apiMessageDto.setMessage("Create store success");
         return apiMessageDto;
     }
 
-/*    @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<String> update(@Valid @RequestBody UpdateStoreForm updateStoreForm, BindingResult bindingResult) {
+        if(!isAdmin()){
+            throw new RequestException(ErrorCode.STORE_ERROR_UNAUTHORIZED, "Not allowed to update.");
+        }
         Store store = storeRepository.findById(updateStoreForm.getId())
                 .orElseThrow(() -> new RequestException(ErrorCode.STORE_ERROR_NOT_FOUND, "Store not found"));
-        Location ward = locationRepository.findById(updateStoreForm.getWardId())
-                .orElseThrow(() -> new RequestException(ErrorCode.LOCATION_ERROR_NOTFOUND, "Ward not found"));
-        Location district = ward.getParent();
-        Location province = district.getParent();
-        if (!Objects.equals(district.getId(), updateStoreForm.getDistrictId()))
-            throw new RequestException(ErrorCode.LOCATION_ERROR_INVALID, "Invalid district");
-        if (!Objects.equals(province.getId(), updateStoreForm.getProvinceId()))
-            throw new RequestException(ErrorCode.LOCATION_ERROR_INVALID, "Invalid province");
         storeMapper.fromUpdateStoreFormToEntity(updateStoreForm, store);
-        store.setProvince(province);
-        store.setDistrict(district);
-        store.setWard(ward);
         storeRepository.save(store);
         return new ApiMessageDto<>("Update store successfully");
-    }*/
+    }
 
     @DeleteMapping(value = "/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<String> delete(@PathVariable(name = "id") Long id) {
         Store store = storeRepository.findById(id)
                 .orElseThrow(() -> new RequestException(ErrorCode.STORE_ERROR_NOT_FOUND, "Store not found"));
-        storeRepository.delete(store);
+        /*storeRepository.delete(store);*/
+        store.setStatus(Constants.STATUS_DELETE);
+        storeRepository.save(store);
         return new ApiMessageDto<>("Delete store successfully");
     }
 }

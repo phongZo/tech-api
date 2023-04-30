@@ -25,19 +25,9 @@ public class UpdateStoreForm {
     @ApiModelProperty(name = "longitude")
     private Double longitude;
 
-    @NotNull(message = "Province id can not be null")
-    @ApiModelProperty(name = "provinceId")
-    private Long provinceId;
-
-    @NotNull(message = "District id can not be null")
-    @ApiModelProperty(name = "districtId")
-    private Long districtId;
-
-    @NotNull(message = "Ward id can not be null")
-    @ApiModelProperty(name = "wardId")
-    private Long wardId;
-
     @NotBlank(message = "Address details can not be blank")
     @ApiModelProperty(name = "addressDetails")
     private String addressDetails;
+
+    private String phone;
 }

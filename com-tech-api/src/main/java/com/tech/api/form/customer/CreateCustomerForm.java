@@ -15,14 +15,6 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class CreateCustomerForm {
-    @NotBlank(message = "Username can not be null")
-    @ApiModelProperty(name = "username", required = true)
-    private String username;
-
-    @NotEmpty(message = "Password cant not be null")
-    @ApiModelProperty(name = "Password", required = true)
-    private String password;
-
     @Email(message = "Email is invalid")
     @ApiModelProperty(name = "email", required = true)
     private String email;
@@ -42,8 +34,6 @@ public class CreateCustomerForm {
     @NotNull(message = "Birthday can not be null")
     @ApiModelProperty(name = "birthday", required = true)
     private LocalDate birthday;
-
-    private String avatar;
 
     @Status
     private Integer status = 1;

@@ -195,9 +195,9 @@ public class CustomerController extends ABasicController {
 
     @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<String> create(@Valid @RequestBody CreateCustomerForm createCustomerForm, BindingResult bindingResult) {
-        if (accountRepository.countAccountByUsernameOrEmailOrPhone(
-                createCustomerForm.getUsername(), createCustomerForm.getEmail(), createCustomerForm.getPhone()
-        ) > 0)
+        if (accountRepository.findAccountByEmail(
+                createCustomerForm.getEmail()
+        ) != null)
             throw new RequestException(ErrorCode.ACCOUNT_ERROR_EXISTED, "Account is existed");
 
         Group groupCustomer = groupRepository.findFirstByKind(Constants.GROUP_KIND_CUSTOMER);

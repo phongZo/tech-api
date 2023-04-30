@@ -29,14 +29,11 @@ public interface CustomerMapper {
 
     @Named("fromCustomerCreateFormToEntity")
     @BeanMapping(ignoreByDefault = true)
-    @Mapping(source = "username", target = "account.username")
-    @Mapping(source = "password", target = "account.password", qualifiedByName = "passwordEncoder")
     @Mapping(source = "email", target = "account.email")
     @Mapping(source = "phone", target = "account.phone")
     @Mapping(source = "fullName", target = "account.fullName")
     @Mapping(source = "gender", target = "gender")
     @Mapping(source = "birthday", target = "birthday")
-    @Mapping(source = "avatar", target = "account.avatarPath")
     @Mapping(source = "status", target = "account.status")
     Customer fromCustomerCreateFormToEntity(CreateCustomerForm createCustomerForm);
 

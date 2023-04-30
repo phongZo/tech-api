@@ -1,5 +1,6 @@
 package com.tech.api.storage.criteria;
 
+import com.tech.api.constant.Constants;
 import com.tech.api.storage.model.Store;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,11 +22,17 @@ public class StoreCriteria {
     private Long districtId;
     private Long wardId;
     private String addressDetails;
+    private boolean clientSide = false;
 
     public Specification<Store> getSpecification() {
         return (root, criteriaQuery, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            if(clientSide){
+                predicates.add(cb.equal(root.get("status"), Constants.STATUS_ACTIVE));
+            } else {
+                predicates.add(cb.notEqual(root.get("status"), Constants.STATUS_DELETE));
+            }
             if (getId() != null) {
                 predicates.add(cb.equal(root.get("id"), getId()));
             }
