@@ -355,14 +355,6 @@ public class OrdersController extends ABasicController{
         }
     }
 
-    private void selectStore(Orders orders) {
-        List<Store> storeList = storeRepository.findAllByProvince(orders.getAddress().getProvince());
-        if(storeList == null || storeList.isEmpty()){
-            storeList = storeRepository.findAll();
-        }
-        orders.setStore(getNearestStore(storeList, orders.getAddress()));
-    }
-
     private Store getNearestStore(List<Store> storeList, CustomerAddress address) {
         Point point = mapboxService.getPoint(address.getAddressDetails());
         address.setLatitude(point.latitude());

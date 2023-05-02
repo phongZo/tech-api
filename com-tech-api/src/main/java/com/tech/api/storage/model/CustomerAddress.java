@@ -39,7 +39,9 @@ public class CustomerAddress extends Auditable<String>{
     @Column(name = "longitude")
     private Double longitude;
 
-    private String province;
+    private Long provinceCode;
+    private Long districtCode;
+    private Long wardCode;
 
     @Column(name = "note")
     private String note;
