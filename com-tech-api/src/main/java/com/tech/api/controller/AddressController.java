@@ -1,7 +1,9 @@
 package com.tech.api.controller;
 
+import com.mapbox.geojson.Point;
 import com.tech.api.constant.Constants;
 import com.tech.api.dto.ApiMessageDto;
+import com.tech.api.service.MapboxService;
 import com.tech.api.storage.model.CustomerAddress;
 import com.tech.api.dto.ErrorCode;
 import com.tech.api.dto.ResponseListObj;
@@ -42,6 +44,9 @@ public class AddressController extends ABasicController{
 
     @Autowired
     GroupRepository groupRepository;
+
+    @Autowired
+    MapboxService mapboxService;
 
     @GetMapping(value = "/client-list",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<CustomerAddressDto>> clientList(CustomerAddressCriteria addressCriteria){
@@ -110,6 +115,12 @@ public class AddressController extends ABasicController{
         }
         CustomerAddress address = addressMapper.fromCreateFormToEntity(createAddressForm);
         address.setCustomer(getCurrentCustomer());
+
+        // get the coordinate from address detail
+        Point point = mapboxService.getPoint(address.getAddressDetails());
+        address.setLatitude(point.latitude());
+        address.setLongitude(point.longitude());
+
         addressRepository.save(address);
         apiMessageDto.setMessage("Create address success");
         return apiMessageDto;
