@@ -36,4 +36,5 @@ public class Store extends Auditable<String> {
     private String phone;
 
     private String province;
+    private Long shopId;
 }

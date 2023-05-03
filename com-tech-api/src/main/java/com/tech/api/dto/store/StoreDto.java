@@ -23,4 +23,5 @@ public class StoreDto {
     private String addressDetails;
 
     private String phone;
+    private Long shopId;
 }

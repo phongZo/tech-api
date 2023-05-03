@@ -29,4 +29,8 @@ public class CreateStoreForm {
     @NotBlank(message = "phone details can not be blank")
     @ApiModelProperty(name = "phone", required = true)
     private String phone;
+
+    @NotNull(message = "shopId can not be null")
+    @ApiModelProperty(name = "shopId", required = true)
+    private Long shopId;
 }
