@@ -28,4 +28,16 @@ public class CreateAddressForm {
     private Boolean isDefault;
 
     private Integer typeAddress;
+
+    @NotNull(message = "provinceCode address can not be null")
+    @ApiModelProperty(name = "provinceCode", required = true)
+    private Long provinceCode;
+
+    @NotNull(message = "districtCode address can not be null")
+    @ApiModelProperty(name = "districtCode", required = true)
+    private Long districtCode;
+
+    @NotNull(message = "wardCode address can not be null")
+    @ApiModelProperty(name = "wardCode", required = true)
+    private Long wardCode;
 }
