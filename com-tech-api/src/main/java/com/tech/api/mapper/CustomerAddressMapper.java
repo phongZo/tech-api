@@ -39,6 +39,9 @@ public interface CustomerAddressMapper {
     @Mapping(source = "phone", target = "phone")
     @Mapping(source = "isDefault", target = "isDefault")
     @Mapping(source = "typeAddress", target = "typeAddress")
+    @Mapping(source = "provinceCode", target = "provinceCode")
+    @Mapping(source = "districtCode", target = "districtCode")
+    @Mapping(source = "wardCode", target = "wardCode")
     @BeanMapping(ignoreByDefault = true)
     @Named("createCustomerAddress")
     CustomerAddress fromCreateFormToEntity(CreateAddressForm address);
@@ -48,6 +51,9 @@ public interface CustomerAddressMapper {
     @Mapping(source = "phone", target = "phone")
     @Mapping(source = "isDefault", target = "isDefault")
     @Mapping(source = "typeAddress", target = "typeAddress")
+    @Mapping(source = "provinceCode", target = "provinceCode")
+    @Mapping(source = "districtCode", target = "districtCode")
+    @Mapping(source = "wardCode", target = "wardCode")
     @BeanMapping(ignoreByDefault = true)
     @Named("updateCustomerAddress")
     void fromUpdateFormToEntity(UpdateAddressForm address, @MappingTarget CustomerAddress customerAddress);
