@@ -156,6 +156,12 @@ public class AddressController extends ABasicController{
             }
         }
         addressMapper.fromUpdateFormToEntity(updateAddressForm, address);
+
+        // get the coordinate from address detail
+        Point point = mapboxService.getPoint(address.getAddressDetails());
+        address.setLatitude(point.latitude());
+        address.setLongitude(point.longitude());
+
         addressRepository.save(address);
         apiMessageDto.setMessage("Update address success");
         return apiMessageDto;
