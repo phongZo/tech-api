@@ -19,7 +19,7 @@ public class MapboxService {
     private static final double EARTH_RADIUS = 6371; // km
 
     @Autowired
-    private static RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
     @Value("${mapbox.accessToken}")
     private String accessToken;
