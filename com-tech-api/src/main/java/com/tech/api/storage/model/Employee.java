@@ -21,12 +21,8 @@ public class Employee {
     private Account account;
 
     @ManyToOne
-    @JoinColumn(name = "department_id", referencedColumnName = "id")
-    private Category department;
-
-    @ManyToOne
-    @JoinColumn(name = "job_id", referencedColumnName = "id")
-    private Category job;
+    @JoinColumn(name = "store_id", referencedColumnName = "id")
+    private Store store;
 
     private String note;
 }

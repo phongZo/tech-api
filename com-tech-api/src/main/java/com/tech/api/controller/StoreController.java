@@ -1,26 +1,31 @@
 package com.tech.api.controller;
 
 import com.tech.api.constant.Constants;
-import com.tech.api.form.store.CreateStoreForm;
+import com.tech.api.form.employee.CreateEmployeeForm;
+import com.tech.api.form.store.*;
 import com.tech.api.dto.ApiMessageDto;
 import com.tech.api.dto.ErrorCode;
 import com.tech.api.dto.ResponseListObj;
 import com.tech.api.dto.store.StoreDto;
 import com.tech.api.dto.store.VerifyStoreDto;
 import com.tech.api.exception.RequestException;
-import com.tech.api.form.store.UpdateStoreForm;
-import com.tech.api.form.store.UpdateStoreStatusForm;
-import com.tech.api.form.store.VerifyDeviceForm;
 import com.tech.api.intercepter.MyAuthentication;
 import com.tech.api.jwt.JWTUtils;
 import com.tech.api.jwt.UserJwt;
+import com.tech.api.mapper.EmployeeMapper;
 import com.tech.api.mapper.StoreMapper;
 import com.tech.api.storage.criteria.StoreCriteria;
+import com.tech.api.storage.model.Employee;
+import com.tech.api.storage.model.Group;
 import com.tech.api.storage.model.Store;
+import com.tech.api.storage.repository.AccountRepository;
+import com.tech.api.storage.repository.EmployeeRepository;
+import com.tech.api.storage.repository.GroupRepository;
 import com.tech.api.storage.repository.StoreRepository;
 import com.tech.api.utils.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -42,6 +47,18 @@ import java.util.Objects;
 public class StoreController extends ABasicController {
     private final StoreRepository storeRepository;
     private final StoreMapper storeMapper;
+
+    @Autowired
+    AccountRepository accountRepository;
+
+    @Autowired
+    GroupRepository groupRepository;
+
+    @Autowired
+    EmployeeRepository employeeRepository;
+
+    @Autowired
+    EmployeeMapper employeeMapper;
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<StoreDto>> list(StoreCriteria storeCriteria, Pageable pageable) {
@@ -102,6 +119,26 @@ public class StoreController extends ABasicController {
         apiMessageDto.setData(dto);
         apiMessageDto.setMessage("Login store success");
         return apiMessageDto;
+    }
+
+    @PostMapping(value = "/create_manager", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<String> create(@Valid @RequestBody CreateEmployeeForm createEmployeeForm, BindingResult bindingResult) {
+        if (accountRepository.countAccountByUsernameOrEmailOrPhone(
+                createEmployeeForm.getUsername(), createEmployeeForm.getEmail(), createEmployeeForm.getPhone()
+        ) > 0)
+            throw new RequestException(ErrorCode.ACCOUNT_ERROR_EXISTED, "Account is existed");
+        Group groupStoreManager = groupRepository.findFirstByKind(Constants.GROUP_KIND_STORE_MANAGER);
+        if(groupStoreManager == null){
+            throw new RequestException(ErrorCode.GENERAL_ERROR_NOT_FOUND, "Group store manager not found");
+        }
+        Store store = storeRepository.findById(createEmployeeForm.getStoreId())
+                .orElseThrow(() -> new RequestException(ErrorCode.STORE_ERROR_NOT_FOUND, "Store not found"));
+        Employee employee = employeeMapper.fromCreateEmployeeFormToEntity(createEmployeeForm);
+        employee.getAccount().setGroup(groupStoreManager);
+        employee.getAccount().setKind(Constants.GROUP_KIND_STORE_MANAGER);
+        employee.setStore(store);
+        employeeRepository.save(employee);
+        return new ApiMessageDto<>("Create employee successfully");
     }
 
     private String generateJWT(Store store) {

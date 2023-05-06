@@ -38,14 +38,6 @@ public class UpdateEmployeeForm {
     @Status
     private Integer status = 1;
 
-    @NotNull(message = "Department can not be blank")
-    @ApiModelProperty(name = "departmentId")
-    private Long departmentId;
-
-    @NotNull(message = "Job can not be blank")
-    @ApiModelProperty(name = "jobId")
-    private Long jobId;
-
     @ApiModelProperty(name = "note")
     private String note;
 }

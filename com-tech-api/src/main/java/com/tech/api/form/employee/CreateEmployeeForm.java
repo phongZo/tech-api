@@ -39,17 +39,9 @@ public class CreateEmployeeForm {
     @Status
     private Integer status = 1;
 
-    @NotNull(message = "Department can not be null")
-    @ApiModelProperty(name = "departmentId")
-    private Long departmentId;
-
-    @NotNull(message = "Job can not be null")
-    @ApiModelProperty(name = "jobId")
-    private Long jobId;
-
-    @NotNull(message = "Group id can not be null")
-    @ApiModelProperty(name = "groupId")
-    private Long groupId;
+    @NotNull(message = "storeId can not be null")
+    @ApiModelProperty(name = "storeId")
+    private Long storeId;
 
     @ApiModelProperty(name = "note")
     private String note;

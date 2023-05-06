@@ -8,22 +8,17 @@ import com.tech.api.form.employee.UpdateEmployeeForm;
 import com.tech.api.mapper.EmployeeMapper;
 import com.tech.api.service.CommonApiService;
 import com.tech.api.storage.criteria.EmployeeCriteria;
-import com.tech.api.storage.model.Account;
-import com.tech.api.storage.model.Group;
+import com.tech.api.storage.model.*;
 import com.tech.api.dto.ErrorCode;
 import com.tech.api.dto.employee.EmployeeAdminDto;
 import com.tech.api.dto.employee.EmployeeDto;
 import com.tech.api.exception.RequestException;
 import com.tech.api.form.employee.UpdateProfileEmployeeForm;
-import com.tech.api.storage.model.Category;
-import com.tech.api.storage.model.Employee;
-import com.tech.api.storage.repository.AccountRepository;
-import com.tech.api.storage.repository.CategoryRepository;
-import com.tech.api.storage.repository.EmployeeRepository;
-import com.tech.api.storage.repository.GroupRepository;
+import com.tech.api.storage.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -49,6 +44,9 @@ public class EmployeeController extends ABasicController {
     private final CategoryRepository categoryRepository;
     private final EmployeeMapper employeeMapper;
     private final CommonApiService commonApiService;
+
+    @Autowired
+    StoreRepository storeRepository;
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<EmployeeAdminDto>> list(EmployeeCriteria employeeCriteria, Pageable pageable) {
@@ -86,19 +84,18 @@ public class EmployeeController extends ABasicController {
                 createEmployeeForm.getUsername(), createEmployeeForm.getEmail(), createEmployeeForm.getPhone()
         ) > 0)
             throw new RequestException(ErrorCode.ACCOUNT_ERROR_EXISTED, "Account is existed");
-        Group groupEmployee = groupRepository.findById(createEmployeeForm.getGroupId())
-                .orElseThrow(() -> new RequestException(ErrorCode.GENERAL_ERROR_NOT_FOUND, "Group does not exist!"));
-        Category department = categoryRepository.findById(createEmployeeForm.getDepartmentId())
-                .orElseThrow(() -> new RequestException(ErrorCode.CATEGORY_ERROR_NOT_FOUND, "Department not found"));
-        Category job = categoryRepository.findById(createEmployeeForm.getJobId())
-                .orElseThrow(() -> new RequestException(ErrorCode.CATEGORY_ERROR_NOT_FOUND, "Job not found"));
+        Group groupEmployee = groupRepository.findFirstByKind(Constants.GROUP_KIND_EMPLOYEE);
+        if(groupEmployee == null){
+            throw new RequestException(ErrorCode.GENERAL_ERROR_NOT_FOUND, "Group employee not found");
+        }
+        Store store = storeRepository.findById(createEmployeeForm.getStoreId())
+                .orElseThrow(() -> new RequestException(ErrorCode.STORE_ERROR_NOT_FOUND, "Store not found"));
         Employee employee = employeeMapper.fromCreateEmployeeFormToEntity(createEmployeeForm);
-        employee.setDepartment(department);
-        employee.setJob(job);
         employee.getAccount().setGroup(groupEmployee);
         employee.getAccount().setKind(Constants.GROUP_KIND_EMPLOYEE);
+        employee.setStore(store);
         employeeRepository.save(employee);
-        return new ApiMessageDto<>("Create employee successfully");
+        return new ApiMessageDto<>("Create manager successfully");
     }
 
     @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -109,17 +106,6 @@ public class EmployeeController extends ABasicController {
             throw new RequestException(ErrorCode.ACCOUNT_ERROR_EXISTED, "Account is existed");
         Employee employee = employeeRepository.findById(updateEmployeeForm.getId())
                 .orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND, "Employee not found"));
-        if (!Objects.equals(updateEmployeeForm.getDepartmentId(), employee.getDepartment().getId())) {
-            Category department = categoryRepository.findById(updateEmployeeForm.getDepartmentId())
-                    .orElseThrow(() -> new RequestException(ErrorCode.CATEGORY_ERROR_NOT_FOUND, "Department not found"));
-            employee.setDepartment(department);
-        }
-        if (!Objects.equals(updateEmployeeForm.getJobId(), employee.getJob().getId())) {
-            Category job = categoryRepository.findById(updateEmployeeForm.getJobId())
-                    .orElseThrow(() -> new RequestException(ErrorCode.CATEGORY_ERROR_NOT_FOUND, "Job not found"));
-            employee.setJob(job);
-        }
-
         if (StringUtils.isNoneBlank(updateEmployeeForm.getAvatar()) && !updateEmployeeForm.getAvatar().equals(employee.getAccount().getAvatarPath()))
             commonApiService.deleteFile(employee.getAccount().getAvatarPath());
         employeeMapper.fromUpdateEmployeeFormToEntity(updateEmployeeForm, employee);
