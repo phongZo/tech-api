@@ -39,5 +39,5 @@ public class CreateAddressForm {
 
     @NotNull(message = "wardCode address can not be null")
     @ApiModelProperty(name = "wardCode", required = true)
-    private Long wardCode;
+    private String wardCode;
 }

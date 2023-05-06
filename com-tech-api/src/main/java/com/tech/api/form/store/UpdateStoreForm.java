@@ -41,5 +41,5 @@ public class UpdateStoreForm {
 
     @NotNull(message = "wardCode can not be null")
     @ApiModelProperty(name = "wardCode", required = true)
-    private Long wardCode;
+    private String wardCode;
 }
