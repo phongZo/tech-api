@@ -21,5 +21,5 @@ public class CustomerAddressDto extends ABasicAdminDto {
     private Double longitude;
     private Long provinceCode;
     private Long districtCode;
-    private Long wardCode;
+    private String wardCode;
 }

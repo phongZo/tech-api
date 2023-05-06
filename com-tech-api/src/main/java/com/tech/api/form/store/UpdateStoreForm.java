@@ -30,4 +30,16 @@ public class UpdateStoreForm {
     private String addressDetails;
 
     private String phone;
+
+    @NotNull(message = "provinceCode can not be null")
+    @ApiModelProperty(name = "provinceCode", required = true)
+    private Long provinceCode;
+
+    @NotNull(message = "districtCode can not be null")
+    @ApiModelProperty(name = "districtCode", required = true)
+    private Long districtCode;
+
+    @NotNull(message = "wardCode can not be null")
+    @ApiModelProperty(name = "wardCode", required = true)
+    private String wardCode;
 }

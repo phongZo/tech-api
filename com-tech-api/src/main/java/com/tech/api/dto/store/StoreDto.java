@@ -24,4 +24,8 @@ public class StoreDto {
 
     private String phone;
     private Long shopId;
+
+    private Long provinceCode;
+    private Long districtCode;
+    private String wardCode;
 }

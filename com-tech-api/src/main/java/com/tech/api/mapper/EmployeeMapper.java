@@ -13,7 +13,7 @@ import java.util.List;
         componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        uses = {AccountMapper.class, CategoryMapper.class}
+        uses = {AccountMapper.class, StoreMapper.class}
 )
 public interface EmployeeMapper {
 
@@ -34,8 +34,7 @@ public interface EmployeeMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "account", target = "account", qualifiedByName = "fromEntityToAccountDtoMapper")
     @Mapping(source = "note", target = "note")
-    @Mapping(source = "department", target = "department", qualifiedByName = "adminGetMapping")
-    @Mapping(source = "job", target = "job", qualifiedByName = "adminGetMapping")
+    @Mapping(source = "store", target = "storeDto", qualifiedByName = "fromStoreEntityToDto")
     EmployeeDto fromEmployeeEntityToDto(Employee employee);
 
     @Named("fromListEmployeeEntityToListDto")
@@ -47,8 +46,7 @@ public interface EmployeeMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "account", target = "account", qualifiedByName = "adminGetMapping")
     @Mapping(source = "note", target = "note")
-    @Mapping(source = "department", target = "department", qualifiedByName = "adminGetMapping")
-    @Mapping(source = "job", target = "job", qualifiedByName = "adminGetMapping")
+    @Mapping(source = "store", target = "storeDto", qualifiedByName = "fromStoreEntityToDto")
     EmployeeAdminDto fromEmployeeEntityToAdminDto(Employee employee);
 
     @Named("fromEmployeeEntityListToAdminDtoListMapper")

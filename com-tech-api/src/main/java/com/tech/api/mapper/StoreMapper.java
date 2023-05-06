@@ -23,6 +23,9 @@ public interface StoreMapper {
     @Mapping(source = "longitude", target = "longitude")
     @Mapping(source = "addressDetails", target = "addressDetails")
     @Mapping(source = "shopId", target = "shopId")
+    @Mapping(source = "provinceCode", target = "provinceCode")
+    @Mapping(source = "districtCode", target = "districtCode")
+    @Mapping(source = "wardCode", target = "wardCode")
     Store fromCreateStoreFormToEntity(CreateStoreForm createStoreForm);
 
     @Named("fromStoreEntityToDto")
@@ -34,6 +37,9 @@ public interface StoreMapper {
     @Mapping(source = "addressDetails", target = "addressDetails")
     @Mapping(source = "phone", target = "phone")
     @Mapping(source = "shopId", target = "shopId")
+    @Mapping(source = "provinceCode", target = "provinceCode")
+    @Mapping(source = "districtCode", target = "districtCode")
+    @Mapping(source = "wardCode", target = "wardCode")
     StoreDto fromStoreEntityToDto(Store store);
 
     @Named("fromStoreEntityListToDtoListMapper")
@@ -47,5 +53,8 @@ public interface StoreMapper {
     @Mapping(source = "longitude", target = "longitude")
     @Mapping(source = "addressDetails", target = "addressDetails")
     @Mapping(source = "phone", target = "phone")
+    @Mapping(source = "provinceCode", target = "provinceCode")
+    @Mapping(source = "districtCode", target = "districtCode")
+    @Mapping(source = "wardCode", target = "wardCode")
     void fromUpdateStoreFormToEntity(UpdateStoreForm updateStoreForm, @MappingTarget Store store);
 }

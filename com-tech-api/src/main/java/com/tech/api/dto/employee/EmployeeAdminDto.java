@@ -2,6 +2,7 @@ package com.tech.api.dto.employee;
 
 import com.tech.api.dto.account.AccountAdminDto;
 import com.tech.api.dto.category.CategoryDto;
+import com.tech.api.dto.store.StoreDto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,11 +16,8 @@ public class EmployeeAdminDto {
     @ApiModelProperty("account")
     private AccountAdminDto account;
 
-    @ApiModelProperty("department")
-    private CategoryDto department;
-
-    @ApiModelProperty("job")
-    private CategoryDto job;
+    @ApiModelProperty("storeDto")
+    private StoreDto storeDto;
 
     @ApiModelProperty("note")
     private String note;
