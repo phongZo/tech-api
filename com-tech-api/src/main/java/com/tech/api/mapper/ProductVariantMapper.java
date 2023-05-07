@@ -54,7 +54,7 @@ public interface ProductVariantMapper {
     @Mapping(source = "image", target = "image")
     ProductVariantDto fromProductVariantEntityToDtoAutoComplete(ProductVariant productVariant);
 
-    @Named("fromProductVariantEntityListToDtoListAutoComplete")
+    @Named("fromProductVariantEntityListToDtoAutoComplete")
     @IterableMapping(elementTargetType = ProductVariantDto.class, qualifiedByName = "fromProductVariantEntityToDtoAutoComplete")
     List<ProductVariantDto> fromProductVariantEntityListToDtoAutoComplete(List<ProductVariant> variants);
 

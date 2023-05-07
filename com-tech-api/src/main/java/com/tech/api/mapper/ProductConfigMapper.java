@@ -43,7 +43,7 @@ public interface ProductConfigMapper {
     @Named("fromProductConfigEntityToAdminDtoMapper")
     @Mapping(source = "id", target = "id")
     @Mapping(source = "name", target = "name")
-    @Mapping(source = "variants", target = "variants", qualifiedByName = "fromProductVariantEntityListToAdminDtoListMapper")
+    @Mapping(source = "variants", target = "variants", qualifiedByName = "fromProductVariantEntityListToDtoAutoComplete")
     ProductConfigAdminDto fromProductConfigEntityToAdminDto(ProductConfig productConfig);
 
     @Named("fromProductConfigEntityListToAdminDtoListMapper")
