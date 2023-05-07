@@ -53,10 +53,10 @@ public class ABasicController {
         return Objects.equals(authentication.getJwtUser().getUserKind(), Constants.USER_KIND_EMPLOYEE);
     }
 
-    public boolean isCollaborator(){
+    public boolean isManager(){
         SecurityContext securityContext = SecurityContextHolder.getContext();
         MyAuthentication authentication = (MyAuthentication)securityContext.getAuthentication();
-        return Objects.equals(authentication.getJwtUser().getUserKind(), Constants.USER_KIND_COLLABORATOR);
+        return Objects.equals(authentication.getJwtUser().getUserKind(), Constants.USER_KIND_STORE_MANAGER);
     }
 
     public boolean isCustomer(){

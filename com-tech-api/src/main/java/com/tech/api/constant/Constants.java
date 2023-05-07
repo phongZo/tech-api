@@ -10,7 +10,7 @@ public class Constants {
     public static final Integer USER_KIND_ADMIN = 1;
     public static final Integer USER_KIND_CUSTOMER = 2;
     public static final Integer USER_KIND_EMPLOYEE = 3;
-    public static final Integer USER_KIND_COLLABORATOR = 4;
+    public static final Integer USER_KIND_STORE_MANAGER = 4;
 
     public static final int LOYALTY_LEVEL_BRONZE = 0;
     public static final int LOYALTY_LEVEL_SILVER = 1;
