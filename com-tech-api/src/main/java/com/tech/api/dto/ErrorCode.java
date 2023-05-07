@@ -170,6 +170,7 @@ public class ErrorCode {
      * Product error code
      */
     public static final String PRODUCT_NOT_FOUND = "PRODUCT-ERROR-000";
+    public static final String PRODUCT_UNAUTHORIZED = "PRODUCT-ERROR-001";
 
     /**
      * Product config error code

@@ -2,6 +2,7 @@ package com.tech.api.dto.product;
 
 import com.tech.api.dto.ABasicAdminDto;
 import com.tech.api.dto.productconfig.ProductConfigAdminDto;
+import com.tech.api.dto.productvariant.VariantStockDto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,4 +44,6 @@ public class ProductAdminDto extends ABasicAdminDto {
 
     @ApiModelProperty(name = "productConfigs")
     private List<ProductConfigAdminDto> productConfigs;
+
+    private List<VariantStockDto> stockDtoList;
 }

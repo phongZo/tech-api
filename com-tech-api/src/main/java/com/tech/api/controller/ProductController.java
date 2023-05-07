@@ -6,6 +6,7 @@ import com.tech.api.dto.ErrorCode;
 import com.tech.api.dto.ResponseListObj;
 import com.tech.api.dto.product.ProductAdminDto;
 import com.tech.api.dto.product.ProductDto;
+import com.tech.api.dto.productvariant.ProductVariantAdminDto;
 import com.tech.api.dto.productvariant.ProductVariantDto;
 import com.tech.api.dto.productvariant.VariantStockDto;
 import com.tech.api.form.product.UpdateFavoriteForm;
@@ -17,13 +18,10 @@ import com.tech.api.storage.criteria.ProductCriteria;
 import com.tech.api.storage.model.Customer;
 import com.tech.api.storage.model.Product;
 import com.tech.api.storage.model.ProductCategory;
-import com.tech.api.storage.repository.CustomerRepository;
-import com.tech.api.storage.repository.ProductRepository;
+import com.tech.api.storage.repository.*;
 import com.tech.api.exception.RequestException;
 import com.tech.api.form.product.CreateProductForm;
 import com.tech.api.storage.model.*;
-import com.tech.api.storage.repository.ProductCategoryRepository;
-import com.tech.api.storage.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +52,10 @@ public class ProductController extends ABasicController {
     @Autowired
     CustomerRepository customerRepository;
 
-    // for store
+    @Autowired
+    EmployeeRepository employeeRepository;
+
+    // for CMS and Store
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<ProductAdminDto>> list(@Valid ProductCriteria productCriteria, BindingResult bindingResult, Pageable pageable) {
         Page<Product> productPage = productRepository.findAll(productCriteria.getSpecification(), pageable);
@@ -155,7 +156,31 @@ public class ProductController extends ABasicController {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Product not found"));
         ProductAdminDto productAdminDto = productMapper.fromProductEntityToAdminDto(product);
+/*        if (!productAdminDto.getProductConfigs().isEmpty()){
+            List<Long> variantListId = new ArrayList<>();
+            for (ProductVariantDto variantDto : productAdminDto.getProductConfigs().get(0).getVariants()){
+                variantListId.add(variantDto.getId());
+            }
+            productAdminDto.setStockDtoList(stockRepository.findAllStocksHaveVariant(variantListId));
+        }*/
         return new ApiMessageDto<>(productAdminDto, "Get product successfully");
+    }
+
+    @GetMapping(value = "/store-get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<ProductDto> getForStore(@PathVariable(name = "id") Long id) {
+        if(!isManager()){
+            throw new RequestException(ErrorCode.PRODUCT_UNAUTHORIZED, "Not allowed to get product.");
+        }
+        Employee employee = employeeRepository.findById(getCurrentUserId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND,"Not found manager"));
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Product not found"));
+        ProductDto productDto = productMapper.fromProductEntityToDtoDetails(product);
+        if (!productDto.getProductConfigs().isEmpty()){
+            for (ProductVariantDto variantDto : productDto.getProductConfigs().get(0).getVariants()){
+                variantDto.setTotalInStock(stockRepository.findFirstByProductVariantIdAndStoreId(variantDto.getId(),employee.getStore().getId()).getTotal());
+            }
+        }
+        return new ApiMessageDto<>(productDto, "Get product successfully");
     }
 
     @GetMapping(value = "/client-get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
