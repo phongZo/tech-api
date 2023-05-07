@@ -89,6 +89,7 @@ public interface ProductMapper {
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
     @Mapping(source = "saleOff", target = "saleOff")
+    @Mapping(source = "totalInStock", target = "totalInStock")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
     @Mapping(source = "parentProduct.id", target = "parentProductId")
     @Mapping(source = "productConfigs", target = "productConfigs", qualifiedByName = "fromProductConfigEntityListToDtoListMapper")

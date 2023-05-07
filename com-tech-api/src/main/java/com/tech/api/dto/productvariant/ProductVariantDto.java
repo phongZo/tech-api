@@ -30,5 +30,5 @@ public class ProductVariantDto {
     private String color;
 
     private Integer status;
-
+    private Integer totalInStock;
 }

@@ -121,10 +121,13 @@ public class OrdersController extends ABasicController{
     }
 
     // Store
-    @GetMapping(value = "/my-orders",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/store/my-orders",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObjOrders> listMyOrders(OrdersCriteria ordersCriteria){
-        Long posId = getCurrentPosId();
-        Store store = storeRepository.findById(posId).orElse(null);
+        if(ordersCriteria.getStoreId() == null){
+            throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED, "Not allowed to get orders");
+        }
+        ordersCriteria.setNotState(Constants.ORDERS_STATE_ARCHIVE);   // don't get archived orders
+        Store store = storeRepository.findById(ordersCriteria.getStoreId()).orElse(null);
         if(store == null || !store.getStatus().equals(Constants.STATUS_ACTIVE)){
             throw new RequestException(ErrorCode.STORE_ERROR_NOT_FOUND,"store not found");
         }

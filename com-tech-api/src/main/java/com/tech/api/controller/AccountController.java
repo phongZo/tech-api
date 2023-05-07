@@ -13,8 +13,10 @@ import com.tech.api.service.CommonApiService;
 import com.tech.api.storage.criteria.AccountCriteria;
 import com.tech.api.storage.model.Account;
 import com.tech.api.storage.model.Customer;
+import com.tech.api.storage.model.Employee;
 import com.tech.api.storage.model.Group;
 import com.tech.api.storage.repository.CustomerRepository;
+import com.tech.api.storage.repository.EmployeeRepository;
 import com.tech.api.storage.repository.GroupRepository;
 import com.tech.api.utils.AESUtils;
 import com.tech.api.utils.ConvertUtils;
@@ -59,6 +61,9 @@ public class AccountController extends ABasicController{
 
     @Autowired
     CustomerRepository customerRepository;
+
+    @Autowired
+    EmployeeRepository employeeRepository;
 
     @Autowired
     CommonApiService commonApiService;
@@ -132,6 +137,10 @@ public class AccountController extends ABasicController{
         loginDto.setToken(token);
         loginDto.setUsername(account.getUsername());
         loginDto.setKind(account.getKind());
+        if(account.getKind().equals(Constants.USER_KIND_EMPLOYEE) || account.getKind().equals(Constants.USER_KIND_STORE_MANAGER)){
+            Employee employee = employeeRepository.findById(account.getId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND, "Not found employee"));
+            loginDto.setStoreId(employee.getStore().getId());
+        }
         return loginDto;
     }
 
