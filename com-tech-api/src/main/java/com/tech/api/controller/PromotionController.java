@@ -109,6 +109,7 @@ public class PromotionController extends ABasicController{
         responseListObj.setPage(list.getTotalPages());
         responseListObj.setTotalElements(list.getTotalElements());
         responseListObj.setTotalPage(list.getTotalPages());
+        apiMessageDto.setData(responseListObj);
         apiMessageDto.setMessage("Get list success");
         return apiMessageDto;
     }
