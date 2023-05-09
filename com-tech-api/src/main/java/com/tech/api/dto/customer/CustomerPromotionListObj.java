@@ -5,5 +5,5 @@ import lombok.Data;
 
 @Data
 public class CustomerPromotionListObj extends ResponseListObj<CustomerPromotionDto> {
-    private Double point;
+    private Integer point;
 }
