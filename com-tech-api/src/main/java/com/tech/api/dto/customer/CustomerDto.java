@@ -37,5 +37,5 @@ public class CustomerDto {
     private List<CustomerAddressDto> addresses;
 
     private Integer loyaltyLevel;
-    private Double loyaltyPoint;
+    private Integer loyaltyPoint;
 }

@@ -478,10 +478,10 @@ public class OrdersController extends ABasicController{
             // update loyalty point and point
             Customer customer = orders.getCustomer();
             if(customer != null){
-                double orderPoint = orders.getTotalMoney() / 1000;
+                int orderPoint = (int) (orders.getTotalMoney() / 1000);
                 // up level
                 if((customer.getLoyaltyPoint() + orderPoint) >= Double.parseDouble(Constants.LOYALTY_MAX_POINT.split(",")[customer.getLoyaltyLevel()])){
-                    customer.setLoyaltyPoint((customer.getLoyaltyPoint() + orderPoint) - Double.parseDouble(Constants.LOYALTY_MAX_POINT.split(",")[customer.getLoyaltyLevel()]));
+                    customer.setLoyaltyPoint((customer.getLoyaltyPoint() + orderPoint) - Integer.parseInt(Constants.LOYALTY_MAX_POINT.split(",")[customer.getLoyaltyLevel()]));
                     customer.setLoyaltyLevel(customer.getLoyaltyLevel() + 1);
 
                     // Give vouchers of level upgraded

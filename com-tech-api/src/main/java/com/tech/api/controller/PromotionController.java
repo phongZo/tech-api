@@ -97,16 +97,18 @@ public class PromotionController extends ABasicController{
     }
 
     @GetMapping(value = "/client-list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<ResponseListObj<PromotionDto>> clientListPromotion(PromotionCriteria criteria, BindingResult bindingResult) {
+    public ApiMessageDto<ResponseListObj<PromotionDto>> clientListPromotion(PromotionCriteria criteria,Pageable pageable) {
         if(!isCustomer()){
             throw new RequestException(ErrorCode.CUSTOMER_ERROR_UNAUTHORIZED, "Not allowed to list promotion.");
         }
         ApiMessageDto<ResponseListObj<PromotionDto>> apiMessageDto = new ApiMessageDto<>();
         criteria.setExchangeable(true);
-        List<Promotion> list = promotionRepository.findAll(criteria.getSpecification());
+        Page<Promotion> list = promotionRepository.findAll(criteria.getSpecification(),pageable);
         ResponseListObj<PromotionDto> responseListObj = new ResponseListObj<>();
-        responseListObj.setData(promotionMapper.fromEntityListToPromotionListDto(list));
-        apiMessageDto.setData(responseListObj);
+        responseListObj.setData(promotionMapper.fromEntityListToPromotionListDto(list.getContent()));
+        responseListObj.setPage(list.getTotalPages());
+        responseListObj.setTotalElements(list.getTotalElements());
+        responseListObj.setTotalPage(list.getTotalPages());
         apiMessageDto.setMessage("Get list success");
         return apiMessageDto;
     }
