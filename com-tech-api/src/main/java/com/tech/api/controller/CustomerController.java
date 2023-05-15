@@ -106,6 +106,8 @@ public class CustomerController extends ABasicController {
         dt = c.getTime();
         customerPromotion.setExpireDate(dt);
         customerPromotionRepository.save(customerPromotion);
+        customer.setPoint((int) (customer.getPoint() - promotion.getPoint()));
+        customerRepository.save(customer);
         apiMessageDto.setMessage("Exchange promotion success");
         return apiMessageDto;
     }
