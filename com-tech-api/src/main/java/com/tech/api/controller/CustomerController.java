@@ -90,7 +90,9 @@ public class CustomerController extends ABasicController {
         }
         Customer customer = getCurrentCustomer();
         if(customer.getPoint() < promotion.getPoint()){
-            throw new RequestException(ErrorCode.PROMOTION_ERROR_NOT_FOUND, "Not found promotion.");
+            apiMessageDto.setResult(false);
+            apiMessageDto.setMessage("Not enough point");
+            return apiMessageDto;
         }
         CustomerPromotion customerPromotion = new CustomerPromotion();
         customerPromotion.setCustomer(customer);
