@@ -47,6 +47,7 @@ public interface CustomerMapper {
     @Mapping(source = "note", target = "note")
     @Mapping(source = "loyaltyLevel", target = "loyaltyLevel")
     @Mapping(source = "loyaltyPoint", target = "loyaltyPoint")
+    @Mapping(source = "point", target = "point")
     CustomerDto fromCustomerEntityToDto(Customer customer);
 
     @Named("fromListCustomerEntityToListDtoMapper")

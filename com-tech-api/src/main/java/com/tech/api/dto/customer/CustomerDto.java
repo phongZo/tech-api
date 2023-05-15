@@ -38,4 +38,5 @@ public class CustomerDto {
 
     private Integer loyaltyLevel;
     private Integer loyaltyPoint;
+    private Integer point;
 }
