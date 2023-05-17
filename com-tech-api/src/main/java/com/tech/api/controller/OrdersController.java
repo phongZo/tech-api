@@ -123,6 +123,9 @@ public class OrdersController extends ABasicController{
     // Store
     @GetMapping(value = "/store/my-orders",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObjOrders> listMyOrders(OrdersCriteria ordersCriteria){
+        if(!isManager() && !isEmployee()){
+            throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED,"Not allowed get list.");
+        }
         if(ordersCriteria.getStoreId() == null){
             throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED, "Not allowed to get orders");
         }
@@ -131,6 +134,7 @@ public class OrdersController extends ABasicController{
         if(store == null || !store.getStatus().equals(Constants.STATUS_ACTIVE)){
             throw new RequestException(ErrorCode.STORE_ERROR_NOT_FOUND,"store not found");
         }
+        if(isEmployee()) ordersCriteria.setEmployeeId(getCurrentUserId());
         ApiMessageDto<ResponseListObjOrders> responseListObjApiMessageDto = new ApiMessageDto<>();
         List<Orders> listOrders = ordersRepository.findAll(ordersCriteria.getSpecification());
         List<OrdersDetail> listFirstDetail = ordersDetailRepository.findFirstByListOrders(listOrders);
@@ -308,7 +312,7 @@ public class OrdersController extends ABasicController{
         //selectStore(orders);
 
         // update each product in stock
-        updateStock(ordersDetailList,orders);
+        //updateStock(ordersDetailList,orders);
         ordersRepository.save(orders);
 
         // remove cart item
