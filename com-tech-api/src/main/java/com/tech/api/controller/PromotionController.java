@@ -103,12 +103,9 @@ public class PromotionController extends ABasicController{
         }
         ApiMessageDto<ResponseListObj<PromotionDto>> apiMessageDto = new ApiMessageDto<>();
         criteria.setExchangeable(true);
-        Page<Promotion> list = promotionRepository.findAll(criteria.getSpecification(),pageable);
+        Page<Promotion> list = promotionRepository.findAll(criteria.getSpecification(),Pageable.unpaged());
         ResponseListObj<PromotionDto> responseListObj = new ResponseListObj<>();
         responseListObj.setData(promotionMapper.fromEntityListToPromotionListDto(list.getContent()));
-        responseListObj.setPage(list.getTotalPages());
-        responseListObj.setTotalElements(list.getTotalElements());
-        responseListObj.setTotalPage(list.getTotalPages());
         apiMessageDto.setData(responseListObj);
         apiMessageDto.setMessage("Get list success");
         return apiMessageDto;

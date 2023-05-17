@@ -6,6 +6,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -30,6 +31,8 @@ public class CreateOrdersClientForm {
     @NotNull(message = "deliveryFee cannot be empty")
     @ApiModelProperty(required = true)
     private Double deliveryFee = 0d;
+
+    private LocalDate expectedTimeDelivery;
 
     @NotEmpty(message = "createOrdersDetailFormList cannot be empty")
     @ApiModelProperty(required = true)

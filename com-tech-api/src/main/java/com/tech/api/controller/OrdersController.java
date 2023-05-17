@@ -2,14 +2,13 @@ package com.tech.api.controller;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mapbox.geojson.Point;
-import com.mapbox.turf.TurfConstants;
-import com.mapbox.turf.TurfMeasurement;
 import com.tech.api.constant.Constants;
 import com.tech.api.dto.ApiMessageDto;
 import com.tech.api.form.orders.OrderPaymentForm;
 import com.tech.api.service.CommonApiService;
 import com.tech.api.service.MapboxService;
 import com.tech.api.storage.model.*;
+import com.tech.api.storage.projection.RevenueOrders;
 import com.tech.api.storage.repository.*;
 import com.tech.api.dto.ErrorCode;
 import com.tech.api.dto.ResponseListObj;
@@ -157,6 +156,26 @@ public class OrdersController extends ABasicController{
         return responseListObjApiMessageDto;
     }
 
+
+    @GetMapping(value = "/revenue",produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<RevenueOrders> getRevenue(OrdersCriteria ordersCriteria){
+        if(!isManager() && !isAdmin()){
+            throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED,"Not allowed get list.");
+        }
+        ApiMessageDto<RevenueOrders> result = new ApiMessageDto<>();
+        RevenueOrders revenueOrders = null;
+        if(isManager()){
+            Employee employee = employeeRepository.findById(getCurrentUserId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND));
+            revenueOrders = ordersRepository.getRevenueOrders(ordersCriteria.getFrom(),ordersCriteria.getTo(),employee.getStore().getId());
+        } else {
+            revenueOrders = ordersRepository.getRevenueOrders(ordersCriteria.getFrom(),ordersCriteria.getTo(),null);
+        }
+        result.setData(revenueOrders);
+        result.setResult(true);
+        result.setMessage("Get revenue success");
+        return result;
+    }
+
     @GetMapping(value = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<OrdersDto> get(@PathVariable("id") Long id) {
         if(!isAdmin()){
@@ -282,10 +301,10 @@ public class OrdersController extends ABasicController{
         orders.setState(Constants.ORDERS_STATE_CREATED);
 
 
-        orders.setExpectedReceiveDate(LocalDate.from(convertToLocalDateViaInstant(new Date())).plusDays(7));
+        orders.setExpectedReceiveDate(createOrdersForm.getExpectedTimeDelivery() == null ? LocalDate.from(convertToLocalDateViaInstant(new Date())).plusDays(7) : createOrdersForm.getExpectedTimeDelivery());
         Orders savedOrder = ordersRepository.save(orders);
         /*-----------------------Xử lý orders detail------------------ */
-        amountPriceCal(orders,ordersDetailList,savedOrder,promotion);  //Tổng tiền hóa đơn
+        amountPriceCal(createOrdersForm.getDeliveryFee(),orders,ordersDetailList,savedOrder,promotion);  //Tổng tiền hóa đơn
 
         // check wallet money if not have enough money
         if(createOrdersForm.getPaymentMethod().equals(Constants.PAYMENT_METHOD_ONLINE)){
@@ -519,7 +538,7 @@ public class OrdersController extends ABasicController{
     }
 
 
-    private void amountPriceCal(Orders orders,List<OrdersDetail> ordersDetailList, Orders savedOrder, CustomerPromotion promotion) {
+    private void amountPriceCal(Double deliveryFee,Orders orders,List<OrdersDetail> ordersDetailList, Orders savedOrder, CustomerPromotion promotion) {
         int checkIndex = 0;
         double amountPrice = 0.0;
         // calculate amount item
@@ -544,7 +563,7 @@ public class OrdersController extends ABasicController{
             checkIndex++;
         }
         orders.setAmount(amount);
-        amountPrice += Constants.DEFAULT_DELIVERY_FEE;
+        amountPrice += deliveryFee;
         Double totalMoney = totalMoneyHaveToPay(amountPrice,orders,promotion);
         orders.setSaleOffMoney(amountPrice - totalMoney);
         orders.setTotalMoney(totalMoney);
