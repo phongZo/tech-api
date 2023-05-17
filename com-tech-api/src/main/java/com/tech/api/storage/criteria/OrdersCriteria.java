@@ -20,6 +20,7 @@ public class OrdersCriteria {
     private Integer state;
     private Integer notState;
     private String code;
+    private Long employeeId;
     private Integer paymentMethod;
     private Integer status;
     private Date from;
@@ -34,6 +35,10 @@ public class OrdersCriteria {
 
                 if(getId() != null){
                     predicates.add(cb.equal(root.get("id"), getId()));
+                }
+                if(getEmployeeId() != null){
+                    Join<Store, Employee> joinEmployee = root.join("employee", JoinType.INNER);
+                    predicates.add(cb.equal(joinEmployee.get("id"), getEmployeeId()));
                 }
                 if (getPaymentMethod() != null){
                     predicates.add(cb.equal(root.get("paymentMethod"),getPaymentMethod()));
