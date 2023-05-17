@@ -18,6 +18,7 @@ import com.tech.api.storage.criteria.ProductCriteria;
 import com.tech.api.storage.model.Customer;
 import com.tech.api.storage.model.Product;
 import com.tech.api.storage.model.ProductCategory;
+import com.tech.api.storage.projection.ProductOrdersDetail;
 import com.tech.api.storage.repository.*;
 import com.tech.api.exception.RequestException;
 import com.tech.api.form.product.CreateProductForm;
@@ -148,6 +149,31 @@ public class ProductController extends ABasicController {
             throw new RequestException(ErrorCode.CUSTOMER_ERROR_NOT_FOUND, "Not found current customer.");
         }
         return customer;
+    }
+
+    // FOR ADMIN
+    @GetMapping(value = "/list-revenue", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<ResponseListObj<ProductOrdersDetail>> revenueList(ProductCriteria productCriteria, Pageable pageable) {
+        if(!isAdmin() && !isManager()){
+            throw new RequestException(ErrorCode.PRODUCT_UNAUTHORIZED);
+        }
+        ApiMessageDto<ResponseListObj<ProductOrdersDetail>> responseListObjApiMessageDto = new ApiMessageDto<>();
+        Page<ProductOrdersDetail> productOrdersDetails = null;
+        if(isAdmin()) productOrdersDetails = productRepository.findAllProductAndRevenue(productCriteria.getFrom(),productCriteria.getTo(),null, pageable);
+        else if(isManager()) {
+            Employee employee = employeeRepository.findById(getCurrentUserId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND));
+            productOrdersDetails = productRepository.findAllProductAndRevenue(productCriteria.getFrom(),productCriteria.getTo(), employee.getStore().getId(),pageable);
+        }
+        ResponseListObj<ProductOrdersDetail> responseListObj = new ResponseListObj<>();
+        if(productOrdersDetails != null){
+            responseListObj.setData(productOrdersDetails.getContent());
+            responseListObj.setPage(pageable.getPageNumber());
+            responseListObj.setTotalPage(productOrdersDetails.getTotalPages());
+            responseListObj.setTotalElements(productOrdersDetails.getTotalElements());
+        }
+        responseListObjApiMessageDto.setData(responseListObj);
+        responseListObjApiMessageDto.setMessage("Get list success");
+        return responseListObjApiMessageDto;
     }
 
 

@@ -1,6 +1,5 @@
 package com.tech.api.storage.criteria;
 
-import com.tech.api.storage.model.Customer;
 import com.tech.api.storage.model.Product;
 import com.tech.api.storage.model.ProductCategory;
 import com.tech.api.storage.model.ProductConfig;
@@ -13,6 +12,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +34,9 @@ public class ProductCriteria {
     @ProductKind
     private Integer kind;
     private List<String> variantNames;
+    private Date from;
+    private Date to;
+    private Long storeId;
 
     public Specification<Product> getSpecification() {
         return (root, criteriaQuery, cb) -> {
