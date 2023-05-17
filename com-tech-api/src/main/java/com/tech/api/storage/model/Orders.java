@@ -35,6 +35,10 @@ public class Orders extends Auditable<String>{
 
     private Integer state; // Trạng thái hiện tại (nhớ tạo constants) 0 created, 1. accepted(da thanh toan), 2 Shipping, 3 done, 4 cancel
 
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
+    private Employee employee; // Nhân viên tạo đơn hàng
+
     @Column(name = "prev_state")
     private Integer prevState; // Trạng thái trước đó
 
