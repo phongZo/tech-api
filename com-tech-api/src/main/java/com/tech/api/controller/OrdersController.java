@@ -357,6 +357,7 @@ public class OrdersController extends ABasicController{
         CreateOrderGhnForm form = new CreateOrderGhnForm();
         form.setPaymentTypeId(Constants.STORE_PAY_DELIVERY_FEE);
         form.setRequireNote(Constants.ALLOW_SEE_GOODS_NOT_TRIAL);
+        if(orders.getPaymentMethod().equals(Constants.PAYMENT_METHOD_COD)) form.setCodeFailedAmount(Integer.parseInt(orders.getDeliveryFee().toString()));
         form.setToName(orders.getAddress().getReceiverFullName());
         form.setToPhone(orders.getAddress().getPhone());
         form.setToAddress(orders.getAddress().getAddressDetails());
@@ -364,6 +365,7 @@ public class OrdersController extends ABasicController{
         form.setToDistrictName(districtName);
         form.setToProvinceName(provinceName);
         if(orders.getPaymentMethod().equals(Constants.PAYMENT_METHOD_COD)) form.setCodAmount(Integer.parseInt(orders.getTotalMoney().toString()));
+        else form.setCodAmount(0);
         form.setWeight(2000);
         form.setHeight(100);
         form.setLength(100);
