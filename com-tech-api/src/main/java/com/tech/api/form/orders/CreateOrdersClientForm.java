@@ -38,4 +38,6 @@ public class CreateOrdersClientForm {
     @ApiModelProperty(required = true)
     private List<CreateOrdersDetailForm> createOrdersDetailFormList;
 
+    private Integer serviceId;
+    private Integer serviceTypeId;
 }

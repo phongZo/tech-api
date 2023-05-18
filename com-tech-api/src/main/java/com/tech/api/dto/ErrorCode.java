@@ -41,6 +41,7 @@ public class ErrorCode {
     public static final String ORDERS_ERROR_UNAUTHORIZED = "ERROR-ORDERS-000";
     public static final String ORDERS_ERROR_NOT_FOUND = "ERROR-ORDERS-001";
     public static final String ORDERS_ERROR_BAD_REQUEST = "ERROR-ORDERS-002";
+    public static final String ORDERS_CREATE_FAILED = "ERROR-ORDERS-003";
 
     /**
      * Customer address error code

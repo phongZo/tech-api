@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mapbox.geojson.Point;
 import com.tech.api.constant.Constants;
 import com.tech.api.dto.ApiMessageDto;
-import com.tech.api.form.orders.OrderPaymentForm;
+import com.tech.api.form.orders.*;
 import com.tech.api.service.CommonApiService;
 import com.tech.api.service.MapboxService;
 import com.tech.api.storage.model.*;
@@ -16,8 +16,6 @@ import com.tech.api.dto.orders.OrdersDetailDto;
 import com.tech.api.dto.orders.OrdersDto;
 import com.tech.api.dto.orders.ResponseListObjOrders;
 import com.tech.api.exception.RequestException;
-import com.tech.api.form.orders.CreateOrdersClientForm;
-import com.tech.api.form.orders.UpdateStateOrdersForm;
 import com.tech.api.mapper.OrdersDetailMapper;
 import com.tech.api.mapper.OrdersMapper;
 import com.tech.api.storage.criteria.OrdersCriteria;
@@ -27,9 +25,10 @@ import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
@@ -100,6 +99,9 @@ public class OrdersController extends ABasicController{
 
     @Autowired
     StockRepository stockRepository;
+
+    @Autowired
+    RestTemplate restTemplate;
 
     @GetMapping(value = "/list",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<OrdersDto>> list(OrdersCriteria ordersCriteria, Pageable pageable){
@@ -304,7 +306,7 @@ public class OrdersController extends ABasicController{
         orders.setExpectedReceiveDate(createOrdersForm.getExpectedTimeDelivery() == null ? LocalDate.from(convertToLocalDateViaInstant(new Date())).plusDays(7) : createOrdersForm.getExpectedTimeDelivery());
         Orders savedOrder = ordersRepository.save(orders);
         /*-----------------------Xử lý orders detail------------------ */
-        amountPriceCal(createOrdersForm.getDeliveryFee(),orders,ordersDetailList,savedOrder,promotion);  //Tổng tiền hóa đơn
+        List<GhnOrderItem> listItem = amountPriceCal(createOrdersForm.getDeliveryFee(),orders,ordersDetailList,savedOrder,promotion);  //Tổng tiền hóa đơn
 
         // check wallet money if not have enough money
         if(createOrdersForm.getPaymentMethod().equals(Constants.PAYMENT_METHOD_ONLINE)){
@@ -339,8 +341,49 @@ public class OrdersController extends ABasicController{
         List<LineItem> list = lineItemRepository.findByCartId(cart.getId());
         lineItemRepository.deleteAll(list);
         cartRepository.save(cart);
+
+        // send to GHN
+        sendToGhnApi(orders, createOrdersForm, listItem);
+
         apiMessageDto.setMessage("Create orders success");
         return apiMessageDto;
+    }
+
+    private void sendToGhnApi(Orders orders, CreateOrdersClientForm createOrdersForm, List<GhnOrderItem> itemList) {
+        String provinceName = orders.getAddress().getAddressDetails().split(",")[orders.getAddress().getAddressDetails().split(",").length - 1].substring(1);   // city
+        String districtName = orders.getAddress().getAddressDetails().split(",")[orders.getAddress().getAddressDetails().split(",").length - 2].substring(1);   // district
+        String wardName = orders.getAddress().getAddressDetails().split(",")[orders.getAddress().getAddressDetails().split(",").length - 3].substring(1);   // ward
+
+        CreateOrderGhnForm form = new CreateOrderGhnForm();
+        form.setPaymentTypeId(Constants.STORE_PAY_DELIVERY_FEE);
+        form.setRequireNote(Constants.ALLOW_SEE_GOODS_NOT_TRIAL);
+        form.setToName(orders.getAddress().getReceiverFullName());
+        form.setToPhone(orders.getAddress().getPhone());
+        form.setToAddress(orders.getAddress().getAddressDetails());
+        form.setToWardName(wardName);
+        form.setToDistrictName(districtName);
+        form.setToProvinceName(provinceName);
+        if(orders.getPaymentMethod().equals(Constants.PAYMENT_METHOD_COD)) form.setCodAmount(Integer.parseInt(orders.getTotalMoney().toString()));
+        form.setWeight(2000);
+        form.setHeight(100);
+        form.setLength(100);
+        form.setWidth(100);
+        form.setInsuranceValue(Integer.parseInt(orders.getTotalMoney().toString()) > Constants.INSURANCE_FEE ? Constants.INSURANCE_FEE : Integer.parseInt(orders.getTotalMoney().toString()));
+        form.setServiceId(createOrdersForm.getServiceId());
+        form.setServiceTypeId(createOrdersForm.getServiceTypeId());
+        form.setItems(itemList);
+
+        String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.set("token", Constants.token);
+        headers.set("shopId", orders.getStore().getShopId().toString());
+        HttpEntity<String> entity = new HttpEntity<>("body", headers);
+        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        if(!result.getStatusCode().equals(HttpStatus.OK)){
+            throw new RequestException(ErrorCode.ORDERS_CREATE_FAILED, "Failed to create order ghn");
+        }
     }
 
     private Store checkStore(CreateOrdersClientForm createOrdersForm) {
@@ -538,7 +581,8 @@ public class OrdersController extends ABasicController{
     }
 
 
-    private void amountPriceCal(Double deliveryFee,Orders orders,List<OrdersDetail> ordersDetailList, Orders savedOrder, CustomerPromotion promotion) {
+    private List<GhnOrderItem> amountPriceCal(Double deliveryFee,Orders orders,List<OrdersDetail> ordersDetailList, Orders savedOrder, CustomerPromotion promotion) {
+        List<GhnOrderItem> listItem = new ArrayList<>();
         int checkIndex = 0;
         double amountPrice = 0.0;
         // calculate amount item
@@ -561,12 +605,19 @@ public class OrdersController extends ABasicController{
             ordersDetail.setPrice(productPrice * ordersDetail.getAmount());
             ordersDetail.setOrders(savedOrder);
             checkIndex++;
+
+            GhnOrderItem item = new GhnOrderItem();
+            item.setName(ordersDetail.getProductVariant().getProductConfig().getProduct().getName() + " (" + ordersDetail.getProductVariant().getName() + ")");
+            item.setPrice(ordersDetail.getPrice());
+            item.setQuantity(ordersDetail.getAmount());
+            listItem.add(item);
         }
         orders.setAmount(amount);
         amountPrice += deliveryFee;
         Double totalMoney = totalMoneyHaveToPay(amountPrice,orders,promotion);
         orders.setSaleOffMoney(amountPrice - totalMoney);
         orders.setTotalMoney(totalMoney);
+        return listItem;
     }
 
     private Double totalMoneyHaveToPay(Double amountPrice,Orders orders, CustomerPromotion promotion) {
