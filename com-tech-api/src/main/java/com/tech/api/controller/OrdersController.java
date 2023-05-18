@@ -623,7 +623,7 @@ public class OrdersController extends ABasicController{
 
             GhnOrderItem item = new GhnOrderItem();
             item.setName(productCheck.getName() + " (" + variant.getName() + ")");
-            item.setPrice(ordersDetail.getPrice());
+            item.setPrice(ordersDetail.getPrice().intValue());
             item.setQuantity(ordersDetail.getAmount());
             listItem.add(item);
         }
