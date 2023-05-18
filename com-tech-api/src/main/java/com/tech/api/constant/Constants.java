@@ -55,7 +55,7 @@ public class Constants {
     public static final Integer MAX_ATTEMPT_LOGIN = 5;
     public static final Integer MAX_TIME_VERIFY_ACCOUNT = 5 * 60 * 1000; //5 minutes
 
-    public static final Integer STORE_PAY_DELIVERY_FEE = 2;
+    public static final Integer STORE_PAY_DELIVERY_FEE = 1;
     public static final String ALLOW_SEE_GOODS_NOT_TRIAL = "CHOXEMHANGKHONGTHU";
     public static final Integer INSURANCE_FEE = 20000000;
     public static final String token = "66b81bdb-de07-11ed-943b-f6b926345ef9";
