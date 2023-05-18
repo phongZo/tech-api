@@ -1,6 +1,7 @@
 package com.tech.api.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tech.api.constant.Constants;
 import com.tech.api.dto.ApiMessageDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,14 +26,13 @@ public class RestService {
     @Autowired
     RestTemplate restTemplate;
 
-    public <T, A> ApiMessageDto<T> POST(A input, String path, String authorization, final Class<T> clazz){
+    public <T, A> ApiMessageDto<T> POST(Long shopId,A input, String path, String authorization, final Class<T> clazz){
         try {
             HttpHeaders headers = new HttpHeaders();
-            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+            //headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
             headers.setContentType(MediaType.APPLICATION_JSON);
-            if(authorization!=null){
-                headers.add("Authorization", authorization);
-            }
+            headers.add("token", Constants.token);
+            headers.add("shopId",shopId.toString());
             HttpEntity<A> entity = new HttpEntity<>(input, headers);
             ParameterizedTypeReference type = new ParameterizedTypeReference<ApiMessageDto<T>>() {
                 public Type getType() {

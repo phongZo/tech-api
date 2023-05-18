@@ -383,7 +383,7 @@ public class OrdersController extends ABasicController{
         form.setItems(itemList);
 
         String base = "/shiip/public-api/v2/shipping-order/create";
-        ApiMessageDto<CreateOrdersGhnDto> result = restService.POST(form,base,null,CreateOrdersGhnDto.class);
+        ApiMessageDto<CreateOrdersGhnDto> result = restService.POST(orders.getStore().getShopId(),form,base,null,CreateOrdersGhnDto.class);
         if(result != null && result.getData() != null){
             return result.getData();
         }
