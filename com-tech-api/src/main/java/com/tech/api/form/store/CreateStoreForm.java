@@ -30,10 +30,6 @@ public class CreateStoreForm {
     @ApiModelProperty(name = "phone", required = true)
     private String phone;
 
-    @NotNull(message = "shopId can not be null")
-    @ApiModelProperty(name = "shopId", required = true)
-    private Long shopId;
-
     @NotNull(message = "provinceCode can not be null")
     @ApiModelProperty(name = "provinceCode", required = true)
     private Long provinceCode;
