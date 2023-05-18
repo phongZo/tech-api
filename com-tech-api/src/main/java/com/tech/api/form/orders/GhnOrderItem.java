@@ -6,5 +6,5 @@ import lombok.Data;
 public class GhnOrderItem {
     private String name;
     private Integer quantity;
-    private Double price;
+    private Integer price;
 }
