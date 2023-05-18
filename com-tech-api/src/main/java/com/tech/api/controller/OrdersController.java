@@ -1,12 +1,14 @@
 package com.tech.api.controller;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mapbox.geojson.Point;
 import com.tech.api.constant.Constants;
 import com.tech.api.dto.ApiMessageDto;
 import com.tech.api.form.orders.*;
 import com.tech.api.service.CommonApiService;
 import com.tech.api.service.MapboxService;
+import com.tech.api.service.MyParameterizedTypeImpl;
 import com.tech.api.storage.model.*;
 import com.tech.api.storage.projection.RevenueOrders;
 import com.tech.api.storage.repository.*;
@@ -23,6 +25,7 @@ import com.tech.api.utils.Config;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
@@ -34,6 +37,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -102,6 +107,9 @@ public class OrdersController extends ABasicController{
 
     @Autowired
     RestTemplate restTemplate;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @GetMapping(value = "/list",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<OrdersDto>> list(OrdersCriteria ordersCriteria, Pageable pageable){
@@ -380,8 +388,14 @@ public class OrdersController extends ABasicController{
         HttpHeaders headers = new HttpHeaders();
         headers.set("token", Constants.token);
         headers.set("shopId", orders.getStore().getShopId().toString());
-        HttpEntity<String> entity = new HttpEntity<>("body", headers);
-        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<CreateOrderGhnForm> entity = new HttpEntity<>(form, headers);
+
+        ParameterizedTypeReference type = new ParameterizedTypeReference<ApiMessageDto<String>>() {
+            public Type getType() {
+                return new MyParameterizedTypeImpl((ParameterizedType) super.getType(), new Type[] {String.class});
+            }};
+        ResponseEntity<ApiMessageDto<String>> result = restTemplate.exchange(url, HttpMethod.POST, entity, type);
         if(!result.getStatusCode().equals(HttpStatus.OK)){
             throw new RequestException(ErrorCode.ORDERS_CREATE_FAILED, "Failed to create order ghn");
         }

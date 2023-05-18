@@ -1,6 +1,8 @@
 package com.tech.api.cfg;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
@@ -119,5 +121,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
         DateFormatter dateFormatter = new DateFormatter(DATE_TIME_FORMAT);
         dateFormatter.setLenient(true);
         registry.addFormatter(dateFormatter);
+    }
+
+    @Bean
+    public ObjectMapper objectMapper(){
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        SimpleDateFormat format = new SimpleDateFormat(WebMvcConfig.DATE_TIME_FORMAT);
+        objectMapper.setDateFormat(format);
+        return objectMapper;
     }
 }
