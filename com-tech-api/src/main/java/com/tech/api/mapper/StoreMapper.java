@@ -22,7 +22,6 @@ public interface StoreMapper {
     @Mapping(source = "latitude", target = "latitude")
     @Mapping(source = "longitude", target = "longitude")
     @Mapping(source = "addressDetails", target = "addressDetails")
-    @Mapping(source = "shopId", target = "shopId")
     @Mapping(source = "provinceCode", target = "provinceCode")
     @Mapping(source = "districtCode", target = "districtCode")
     @Mapping(source = "wardCode", target = "wardCode")

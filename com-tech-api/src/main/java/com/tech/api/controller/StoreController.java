@@ -1,6 +1,8 @@
 package com.tech.api.controller;
 
 import com.tech.api.constant.Constants;
+import com.tech.api.dto.orders.CreateOrdersGhnDto;
+import com.tech.api.dto.store.ResponseCreateStore;
 import com.tech.api.form.employee.CreateEmployeeForm;
 import com.tech.api.form.store.*;
 import com.tech.api.dto.ApiMessageDto;
@@ -14,6 +16,7 @@ import com.tech.api.jwt.JWTUtils;
 import com.tech.api.jwt.UserJwt;
 import com.tech.api.mapper.EmployeeMapper;
 import com.tech.api.mapper.StoreMapper;
+import com.tech.api.service.RestService;
 import com.tech.api.storage.criteria.StoreCriteria;
 import com.tech.api.storage.model.Employee;
 import com.tech.api.storage.model.Group;
@@ -59,6 +62,9 @@ public class StoreController extends ABasicController {
 
     @Autowired
     EmployeeMapper employeeMapper;
+
+    @Autowired
+    RestService restService;
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<StoreDto>> list(StoreCriteria storeCriteria, Pageable pageable) {
@@ -165,9 +171,29 @@ public class StoreController extends ABasicController {
         }
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
         Store store = storeMapper.fromCreateStoreFormToEntity(createStoreForm);
+
+        // call to ghn api to create store
+        Long shopId = requestToCreateStoreGhn(store);
+        store.setShopId(shopId);
         storeRepository.save(store);
         apiMessageDto.setMessage("Create store success");
         return apiMessageDto;
+    }
+
+    private Long requestToCreateStoreGhn(Store store) {
+        GhnCreateStoreForm form = new GhnCreateStoreForm();
+        form.setDistrictId(store.getDistrictCode());
+        form.setWardCode(store.getWardCode());
+        form.setName(store.getName());
+        form.setPhone(store.getPhone());
+        form.setAddress(store.getAddressDetails().split(",")[0]);
+
+        String base = "/shiip/public-api/v2/shop/register";
+        ApiMessageDto<ResponseCreateStore> result = restService.POST(null,form,base,null, ResponseCreateStore.class);
+        if(result != null && result.getData() != null){
+            return result.getData().getShopId();
+        }
+        return null;
     }
 
     @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)

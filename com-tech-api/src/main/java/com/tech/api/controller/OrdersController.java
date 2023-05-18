@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mapbox.geojson.Point;
 import com.tech.api.constant.Constants;
 import com.tech.api.dto.ApiMessageDto;
-import com.tech.api.dto.orders.CreateOrdersGhnDto;
+import com.tech.api.dto.orders.*;
 import com.tech.api.form.orders.*;
 import com.tech.api.service.CommonApiService;
 import com.tech.api.service.MapboxService;
@@ -15,9 +15,6 @@ import com.tech.api.storage.projection.RevenueOrders;
 import com.tech.api.storage.repository.*;
 import com.tech.api.dto.ErrorCode;
 import com.tech.api.dto.ResponseListObj;
-import com.tech.api.dto.orders.OrdersDetailDto;
-import com.tech.api.dto.orders.OrdersDto;
-import com.tech.api.dto.orders.ResponseListObjOrders;
 import com.tech.api.exception.RequestException;
 import com.tech.api.mapper.OrdersDetailMapper;
 import com.tech.api.mapper.OrdersMapper;
@@ -31,7 +28,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
@@ -240,6 +236,37 @@ public class OrdersController extends ABasicController{
         responseListObjApiMessageDto.setData(responseListObj);
         responseListObjApiMessageDto.setMessage("Get list success");
         return responseListObjApiMessageDto;
+    }
+
+    @PutMapping(value = "/cancel-orders/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional
+    public ApiMessageDto<String> cancelOrders(@PathVariable("id") Long id) {
+        if (!isAdmin() && !isManager()) {
+            throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED, "Not allowed to cancel orders.");
+        }
+        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
+        Orders orders = ordersRepository.findById(id).orElse(null);
+        if(orders == null){
+            throw new RequestException(ErrorCode.ORDERS_ERROR_NOT_FOUND, "Order Not Found");
+        }
+        checkState(orders);
+        Integer prevState = orders.getState();
+        orders.setState(Constants.ORDERS_STATE_CANCELED);
+        orders.setPrevState(prevState);
+        requestToGhnApi(orders);
+        ordersRepository.save(orders);
+
+        apiMessageDto.setMessage("Cancel order success");
+        return apiMessageDto;
+    }
+
+    private void requestToGhnApi(Orders orders) {
+        String base = "/shiip/public-api/v2/switch-status/cancel";
+        List<String> ordersId = new ArrayList<>();
+        ordersId.add(orders.getCode());
+        GhnCancelOrdersForm form = new GhnCancelOrdersForm();
+        form.setOrderCodes(ordersId);
+        ApiMessageDto<List<GhnCancelOrderResponse>> result = restService.POST_FOR_LIST(orders.getStore().getShopId(),form,base,null, GhnCancelOrderResponse.class);
     }
 
     @GetMapping(value = "/client-get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
