@@ -374,10 +374,10 @@ public class OrdersController extends ABasicController{
         form.setToProvinceName(provinceName);
         if(orders.getPaymentMethod().equals(Constants.PAYMENT_METHOD_COD)) form.setCodAmount(orders.getTotalMoney().intValue());
         else form.setCodAmount(0);
-        form.setWeight(2000);
-        form.setHeight(100);
-        form.setLength(100);
-        form.setWidth(100);
+        form.setWeight(200);
+        form.setHeight(10);
+        form.setLength(1);
+        form.setWidth(20);
         form.setInsuranceValue(orders.getTotalMoney().intValue() > Constants.INSURANCE_FEE ? Constants.INSURANCE_FEE : orders.getTotalMoney().intValue());
         form.setServiceId(createOrdersForm.getServiceId());
         form.setServiceTypeId(createOrdersForm.getServiceTypeId());
@@ -391,12 +391,9 @@ public class OrdersController extends ABasicController{
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<CreateOrderGhnForm> entity = new HttpEntity<>(form, headers);
 
-        ParameterizedTypeReference type = new ParameterizedTypeReference<ApiMessageDto<String>>() {
-            public Type getType() {
-                return new MyParameterizedTypeImpl((ParameterizedType) super.getType(), new Type[] {String.class});
-            }};
-        ResponseEntity<ApiMessageDto<String>> result = restTemplate.exchange(url, HttpMethod.POST, entity, type);
-        if(!result.getStatusCode().equals(HttpStatus.OK)){
+        try{
+            restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        } catch (Exception ex){
             throw new RequestException(ErrorCode.ORDERS_CREATE_FAILED, "Failed to create order ghn");
         }
     }
