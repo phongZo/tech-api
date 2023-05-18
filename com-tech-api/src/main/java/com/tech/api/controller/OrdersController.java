@@ -609,7 +609,7 @@ public class OrdersController extends ABasicController{
             checkIndex++;
 
             GhnOrderItem item = new GhnOrderItem();
-            item.setName(ordersDetail.getProductVariant().getProductConfig().getProduct().getName() + " (" + ordersDetail.getProductVariant().getName() + ")");
+            item.setName(productCheck.getName() + " (" + variant.getName() + ")");
             item.setPrice(ordersDetail.getPrice());
             item.setQuantity(ordersDetail.getAmount());
             listItem.add(item);
