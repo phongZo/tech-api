@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mapbox.geojson.Point;
 import com.tech.api.constant.Constants;
 import com.tech.api.dto.ApiMessageDto;
+import com.tech.api.dto.orders.CreateOrdersGhnDto;
 import com.tech.api.form.orders.*;
 import com.tech.api.service.CommonApiService;
 import com.tech.api.service.MapboxService;
+import com.tech.api.service.RestService;
 import com.tech.api.storage.model.*;
 import com.tech.api.storage.projection.RevenueOrders;
 import com.tech.api.storage.repository.*;
@@ -102,7 +104,7 @@ public class OrdersController extends ABasicController{
     StockRepository stockRepository;
 
     @Autowired
-    RestTemplate restTemplate;
+    RestService restService;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -303,7 +305,7 @@ public class OrdersController extends ABasicController{
         if(checkSaleOff < 0){
             throw new RequestException(ErrorCode.ORDERS_ERROR_BAD_REQUEST, "saleOff is not accepted");
         }
-        orders.setCode(generateCode());
+        //orders.setCode(generateCode());
         orders.setState(Constants.ORDERS_STATE_CREATED);
 
 
@@ -338,6 +340,10 @@ public class OrdersController extends ABasicController{
 
         // update each product in stock
         //updateStock(ordersDetailList,orders);
+        // send to GHN
+        CreateOrdersGhnDto dto = sendToGhnApi(orders, createOrdersForm, listItem);
+        if(dto == null)  throw new RequestException(ErrorCode.ORDERS_CREATE_FAILED);
+        orders.setCode(dto.getOrderCode());
         ordersRepository.save(orders);
 
         // remove cart item
@@ -346,14 +352,11 @@ public class OrdersController extends ABasicController{
         lineItemRepository.deleteAll(list);
         cartRepository.save(cart);
 
-        // send to GHN
-        sendToGhnApi(orders, createOrdersForm, listItem);
-
         apiMessageDto.setMessage("Create orders success");
         return apiMessageDto;
     }
 
-    private void sendToGhnApi(Orders orders, CreateOrdersClientForm createOrdersForm, List<GhnOrderItem> itemList) {
+    private CreateOrdersGhnDto sendToGhnApi(Orders orders, CreateOrdersClientForm createOrdersForm, List<GhnOrderItem> itemList) {
         String provinceName = orders.getAddress().getAddressDetails().split(",")[orders.getAddress().getAddressDetails().split(",").length - 1].substring(1);   // city
         String districtName = orders.getAddress().getAddressDetails().split(",")[orders.getAddress().getAddressDetails().split(",").length - 2].substring(1);   // district
         String wardName = orders.getAddress().getAddressDetails().split(",")[orders.getAddress().getAddressDetails().split(",").length - 3].substring(1);   // ward
@@ -379,19 +382,12 @@ public class OrdersController extends ABasicController{
         form.setServiceTypeId(createOrdersForm.getServiceTypeId());
         form.setItems(itemList);
 
-        String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("token", Constants.token);
-        headers.set("shopId", orders.getStore().getShopId().toString());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<CreateOrderGhnForm> entity = new HttpEntity<>(form, headers);
-
-        try{
-            restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-        } catch (Exception ex){
-            throw new RequestException(ErrorCode.ORDERS_CREATE_FAILED, "Failed to create order ghn");
+        String base = "/shiip/public-api/v2/shipping-order/create";
+        ApiMessageDto<CreateOrdersGhnDto> result = restService.POST(form,base,null,CreateOrdersGhnDto.class);
+        if(result != null && result.getData() != null){
+            return result.getData();
         }
+        return null;
     }
 
     private Store checkStore(CreateOrdersClientForm createOrdersForm) {
