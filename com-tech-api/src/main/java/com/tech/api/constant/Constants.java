@@ -48,8 +48,6 @@ public class Constants {
 
     public static final Integer LIMIT_CANCEL_ORDER_TIME = 3;
 
-    public static final Double DEFAULT_DELIVERY_FEE = 30000d;
-
     public static final Integer MAX_ATTEMPT_FORGET_PWD = 5;
     public static final Integer MAX_TIME_FORGET_PWD = 5 * 60 * 1000; //5 minutes
     public static final Integer MAX_ATTEMPT_LOGIN = 5;
