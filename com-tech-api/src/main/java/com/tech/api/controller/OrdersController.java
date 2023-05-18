@@ -378,7 +378,6 @@ public class OrdersController extends ABasicController{
         String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create";
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.set("token", Constants.token);
         headers.set("shopId", orders.getStore().getShopId().toString());
         HttpEntity<String> entity = new HttpEntity<>("body", headers);
