@@ -12,6 +12,14 @@ import java.util.List;
 public interface StockRepository extends JpaRepository<Stock, Long>, JpaSpecificationExecutor<Stock> {
     Stock findFirstByProductVariantIdAndStoreId(Long productId, Long storeId);
 
+    @Query("SELECT s" +
+            " FROM Stock s" +
+            " WHERE s.store.id = :storeId" +
+            " AND s.productVariant.id IN :variantList" +
+            " AND s.total > 0")
+    List<Stock> findAllByListProductVariantIdAndStoreId(@Param("variantList") List<Long> variantList,
+                                                        @Param("storeId") Long storeId);
+
     @Query("SELECT st.phone AS phone, st.addressDetails AS addressDetails, st.name AS name " +
             "FROM Stock s " +
             "JOIN ProductVariant v ON s.productVariant = v " +
