@@ -6,11 +6,14 @@ import com.mapbox.geojson.Point;
 import com.tech.api.constant.Constants;
 import com.tech.api.dto.ApiMessageDto;
 import com.tech.api.dto.orders.*;
+import com.tech.api.dto.store.StoreDto;
 import com.tech.api.form.orders.*;
+import com.tech.api.mapper.StoreMapper;
 import com.tech.api.service.CommonApiService;
 import com.tech.api.service.MapboxService;
 import com.tech.api.service.RestService;
 import com.tech.api.storage.model.*;
+import com.tech.api.storage.projection.RevenueMonthly;
 import com.tech.api.storage.projection.RevenueOrders;
 import com.tech.api.storage.repository.*;
 import com.tech.api.dto.ErrorCode;
@@ -105,6 +108,9 @@ public class OrdersController extends ABasicController{
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    StoreMapper storeMapper;
+
     @GetMapping(value = "/list",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<OrdersDto>> list(OrdersCriteria ordersCriteria, Pageable pageable){
         if(!isAdmin()){
@@ -175,6 +181,28 @@ public class OrdersController extends ABasicController{
             revenueOrders = ordersRepository.getRevenueOrders(ordersCriteria.getFrom(),ordersCriteria.getTo(),null);
         }
         result.setData(revenueOrders);
+        result.setResult(true);
+        result.setMessage("Get revenue success");
+        return result;
+    }
+
+    @GetMapping(value = "/revenue-by-year",produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<ResponseListObj<RevenueMonthly>> getRevenueByYear(@RequestParam("year") Integer year){
+        if(!isManager() && !isAdmin()){
+            throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED,"Not allowed get list.");
+        }
+        ApiMessageDto<ResponseListObj<RevenueMonthly>> result = new ApiMessageDto<>();
+        List<RevenueMonthly> revenueMonthly = null;
+
+        if(isManager()){
+            Employee employee = employeeRepository.findById(getCurrentUserId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND));
+            revenueMonthly = ordersRepository.getRevenueMonthlyForManager(year,employee.getStore().getId());
+        } else {
+            revenueMonthly = ordersRepository.getRevenueMonthly(year);
+        }
+        ResponseListObj<RevenueMonthly> responseListObj = new ResponseListObj<>();
+        responseListObj.setData(revenueMonthly);
+        result.setData(responseListObj);
         result.setResult(true);
         result.setMessage("Get revenue success");
         return result;
@@ -316,7 +344,7 @@ public class OrdersController extends ABasicController{
             apiMessageDto.setMessage("Cửa hàng hiện không hoạt động");
             return apiMessageDto;
         }
-        CustomerAddress address = checkAddress(createOrdersForm);
+        CustomerAddress address = checkAddress(createOrdersForm.getCustomerAddressId());
         CustomerPromotion promotion = null;
         if(createOrdersForm.getPromotionId() != null){
             promotion = checkPromotion(createOrdersForm);
@@ -425,9 +453,48 @@ public class OrdersController extends ABasicController{
         return store;
     }
 
-    private void updateStock(List<OrdersDetail> ordersDetailList, Orders orders) {
-        for (OrdersDetail detail : ordersDetailList){
 
+    @PostMapping(value = "/get-valid-store", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<StoreDto> clientGetStore(@Valid @RequestBody GetValidStoreForm getValidStoreForm, BindingResult bindingResult){
+        ApiMessageDto<StoreDto> apiMessageDto = new ApiMessageDto<>();
+        CustomerAddress address = checkAddress(getValidStoreForm.getCustomerAddressId());
+        List<Store> storeList = storeRepository.findAllByProvinceCode(address.getProvinceCode());
+        List<Long> variantList = new ArrayList<>();
+        List<OrdersDetail> ordersDetailList = ordersDetailMapper
+                .fromCreateOrdersDetailFormListToOrdersDetailList(getValidStoreForm.getCreateOrdersDetailFormList());
+        for (OrdersDetail detail : ordersDetailList){
+            variantList.add(detail.getProductVariant().getId());
+        }
+        if(!storeList.isEmpty()){
+            return nearestStore(storeList,address,variantList.size(),variantList);
+        } else {
+            // find all store
+            storeList = storeRepository.findAll();
+            return nearestStore(storeList,address,variantList.size(),variantList);
+        }
+    }
+
+    private ApiMessageDto<StoreDto> nearestStore(List<Store> storeList, CustomerAddress address, Integer size, List<Long> variantList) {
+        ApiMessageDto<StoreDto> apiMessageDto = new ApiMessageDto<>();
+        storeList.sort(Comparator.comparingDouble(check ->
+                calculateDistance(check, address)));
+        for (Store storeCheck : storeList){
+            List<Stock> stockList = stockRepository.findAllByListProductVariantIdAndStoreId(variantList,storeCheck.getId());
+            if(stockList.size() == size){
+                apiMessageDto.setMessage("Get valid store success");
+                apiMessageDto.setData(storeMapper.fromStoreEntityToDto(storeCheck));
+                return apiMessageDto;
+            }
+        }
+
+        // not found any store can produce all products --> return nearest store only
+        apiMessageDto.setMessage("Get valid store success");
+        apiMessageDto.setData(storeMapper.fromStoreEntityToDto(storeList.get(0)));
+        return apiMessageDto;
+    }
+
+/*    private void getValidStore(List<OrdersDetail> ordersDetailList, Store store) {
+        for (OrdersDetail detail : ordersDetailList){
             ProductVariant variant = productVariantRepository.findById(detail.getProductVariant().getId()).orElse(null);
             if(variant == null){
                 throw new RequestException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND, "product variant not existed");
@@ -437,8 +504,9 @@ public class OrdersController extends ABasicController{
                 throw new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "product is not existed");
             }
 
+
             // update in stock of store
-            Stock stock = stockRepository.findFirstByProductVariantIdAndStoreId(variant.getId(), orders.getStore().getId());
+            Stock stock = stockRepository.findFirstByProductVariantIdAndStoreId(variant.getId(), store.getId());
             if(stock != null && stock.getTotal() != null && stock.getTotal() >= detail.getAmount()) {
                 stock.setTotal(stock.getTotal() - detail.getAmount());
                 stockRepository.save(stock);
@@ -453,24 +521,10 @@ public class OrdersController extends ABasicController{
             productCheck.setTotalInStock(productCheck.getTotalInStock() - detail.getAmount());
             productRepository.save(productCheck);
         }
-    }
+    }*/
 
-    private Store getNearestStore(List<Store> storeList, CustomerAddress address) {
-        Point point = mapboxService.getPoint(address.getAddressDetails());
-        address.setLatitude(point.latitude());
-        address.setLongitude(point.longitude());
-        customerAddressRepository.save(address);
-
-        double minDistance = 10000;
-        Store nearestStore = null;
-        for (Store store : storeList){
-            double distance = mapboxService.distance(store.getLatitude(),store.getLongitude(),point.latitude(),point.longitude());
-            if(minDistance < distance){
-                minDistance = distance;
-                nearestStore = store;
-            }
-        }
-        return nearestStore;
+    private double calculateDistance(Store store, CustomerAddress address) {
+        return mapboxService.distance(store.getLatitude(),store.getLongitude(),address.getLatitude(),address.getLongitude());
     }
 
     private CustomerPromotion checkPromotion(CreateOrdersClientForm createOrdersForm) {
@@ -484,8 +538,8 @@ public class OrdersController extends ABasicController{
         return promotion;
     }
 
-    private CustomerAddress checkAddress(CreateOrdersClientForm createOrdersForm) {
-        CustomerAddress address = customerAddressRepository.findById(createOrdersForm.getCustomerAddressId()).orElse(null);
+    private CustomerAddress checkAddress(Long id) {
+        CustomerAddress address = customerAddressRepository.findById(id).orElse(null);
         if(address == null) {
             throw new RequestException(ErrorCode.CUSTOMER_ADDRESS_ERROR_NOT_FOUND, "Not found address");
         }

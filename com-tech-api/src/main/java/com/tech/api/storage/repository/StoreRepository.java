@@ -15,4 +15,6 @@ public interface StoreRepository extends JpaRepository<Store, Long>, JpaSpecific
             " JOIN ProductVariant p ON st.productVariant = p" +
             " WHERE st.productVariant IN :variantList AND st.total > 0")
     List<Store> findAllByProvince(String province);
+
+    List<Store> findAllByProvinceCode(Long id);
 }
