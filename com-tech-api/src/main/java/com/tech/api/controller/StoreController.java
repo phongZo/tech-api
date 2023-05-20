@@ -213,7 +213,7 @@ public class StoreController extends ABasicController {
         Store store = storeRepository.findById(id)
                 .orElseThrow(() -> new RequestException(ErrorCode.STORE_ERROR_NOT_FOUND, "Store not found"));
         /*storeRepository.delete(store);*/
-        store.setStatus(Constants.STATUS_DELETE);
+        store.setStatus(Constants.STATUS_LOCK);
         storeRepository.save(store);
         return new ApiMessageDto<>("Delete store successfully");
     }

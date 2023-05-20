@@ -28,4 +28,5 @@ public class StoreDto {
     private Long provinceCode;
     private Long districtCode;
     private String wardCode;
+    private Integer status;
 }

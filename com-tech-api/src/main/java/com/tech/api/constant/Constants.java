@@ -65,6 +65,11 @@ public class Constants {
     public static final Integer PAYMENT_METHOD_COD = 1;
     public static final Integer PAYMENT_METHOD_ONLINE = 2;
 
+    public static final Integer IMPORT_STATE_PENDING = 1;
+    public static final Integer IMPORT_STATE_ACCEPTED = 2;
+    public static final Integer IMPORT_STATE_DENIED = 3;
+    public static final Integer IMPORT_STATE_CANCELED = 4;
+
     public static final Integer GENDER_MALE = 1;
     public static final Integer GENDER_FEMALE = 2;
     public static final Integer GENDER_OTHER = 3;
