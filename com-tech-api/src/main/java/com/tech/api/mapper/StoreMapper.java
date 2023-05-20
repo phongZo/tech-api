@@ -39,6 +39,7 @@ public interface StoreMapper {
     @Mapping(source = "provinceCode", target = "provinceCode")
     @Mapping(source = "districtCode", target = "districtCode")
     @Mapping(source = "wardCode", target = "wardCode")
+    @Mapping(source = "status", target = "status")
     StoreDto fromStoreEntityToDto(Store store);
 
     @Named("fromStoreEntityListToDtoListMapper")

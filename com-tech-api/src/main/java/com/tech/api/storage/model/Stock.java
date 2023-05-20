@@ -18,7 +18,7 @@ public class Stock extends Auditable<String>{
     @JoinColumn(name = "variant_id")
     private ProductVariant productVariant;
 
-    @OneToOne(cascade = {CascadeType.ALL})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id")
     private Store store;
 

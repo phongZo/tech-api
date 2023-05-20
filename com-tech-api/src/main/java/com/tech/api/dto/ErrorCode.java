@@ -29,6 +29,12 @@ public class ErrorCode {
     public static final String GROUP_ERROR_CAN_NOT_DELETED = "ERROR-GROUP-003";
 
     /**
+     * Import error code
+     */
+    public static final String IMPORT_ERROR_UNAUTHORIZED = "ERROR-IMPORT-000";
+    public static final String IMPORT_ERROR_NOT_FOUND = "ERROR-IMPORT-001";
+
+    /**
      * Promotion error code
      */
     public static final String PROMOTION_ERROR_UNAUTHORIZED = "ERROR-PROMOTION-000";
