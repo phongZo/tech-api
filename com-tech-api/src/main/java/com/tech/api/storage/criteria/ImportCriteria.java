@@ -20,7 +20,7 @@ public class ImportCriteria {
             public Predicate toPredicate(Root<Import> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
                 List<Predicate> predicates = new ArrayList<>();
                 query.orderBy(cb.desc(root.get("createdDate")));
-                if(isManagerShow){
+                if(getIsManagerShow() != null && getIsManagerShow()){
                     predicates.add(cb.lessThan(root.get("date"), LocalDate.now()));
                 }
                 if(getStoreId() != null) {
