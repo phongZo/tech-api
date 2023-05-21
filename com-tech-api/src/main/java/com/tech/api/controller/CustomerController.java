@@ -112,6 +112,18 @@ public class CustomerController extends ABasicController {
         return apiMessageDto;
     }
 
+    @GetMapping(value = "/total", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<Long> getTotalCustomer() {
+        if(!isManager() && !isAdmin()){
+            throw new RequestException(ErrorCode.CUSTOMER_ERROR_UNAUTHORIZED, "Not allowed to get total.");
+        }
+        ApiMessageDto<Long> apiMessageDto = new ApiMessageDto<>();
+        long total = customerRepository.count();
+        apiMessageDto.setData(total);
+        apiMessageDto.setMessage("Get total customer success");
+        return apiMessageDto;
+    }
+
     @GetMapping(value = "/promotion/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<CustomerPromotionListObj> clientListPromotion(CustomerPromotionCriteria criteria, BindingResult bindingResult) {
         if(!isCustomer()){

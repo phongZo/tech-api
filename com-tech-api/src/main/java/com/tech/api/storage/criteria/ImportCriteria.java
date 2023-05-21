@@ -5,12 +5,14 @@ import lombok.Data;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 public class ImportCriteria {
     private Long storeId;
+    private Boolean isManagerShow;
     public Specification<Import> getSpecification() {
         return new Specification<Import>() {
             private static final long seriatechersionUID = 1L;
@@ -18,6 +20,9 @@ public class ImportCriteria {
             public Predicate toPredicate(Root<Import> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
                 List<Predicate> predicates = new ArrayList<>();
                 query.orderBy(cb.desc(root.get("createdDate")));
+                if(isManagerShow){
+                    predicates.add(cb.lessThan(root.get("date"), LocalDate.now()));
+                }
                 if(getStoreId() != null) {
                     Join<Store, Import> joinStore = root.join("store", JoinType.INNER);
                     predicates.add(cb.equal(joinStore.get("id"), getStoreId()));

@@ -73,6 +73,7 @@ public interface ProductMapper {
     @Mapping(source = "name", target = "name")
     @Mapping(source = "image", target = "image")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
+    @Mapping(source = "totalInStock", target = "totalInStock")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "price", target = "price")
     ProductAdminDto fromProductEntityToDtoAutoComplete(Product product);

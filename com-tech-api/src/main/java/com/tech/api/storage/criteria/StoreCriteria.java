@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -23,6 +24,8 @@ public class StoreCriteria {
     private Long wardId;
     private String addressDetails;
     private boolean clientSide = false;
+    private Date from;
+    private Date to;
 
     public Specification<Store> getSpecification() {
         return (root, criteriaQuery, cb) -> {

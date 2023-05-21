@@ -32,4 +32,7 @@ public class UpdateProductVariantForm {
     @Status
     @ApiModelProperty(name = "status")
     private Integer status = 1;
+
+    @ApiModelProperty(name = "color")
+    private String color;
 }

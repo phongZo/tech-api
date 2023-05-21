@@ -59,6 +59,9 @@ public class ProductController extends ABasicController {
     // for CMS and Store
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<ProductAdminDto>> list(@Valid ProductCriteria productCriteria, BindingResult bindingResult, Pageable pageable) {
+        if(!isAdmin() && !isManager()){
+            throw new RequestException(ErrorCode.PRODUCT_UNAUTHORIZED, "Not allowed to get list.");
+        }
         Page<Product> productPage = productRepository.findAll(productCriteria.getSpecification(), pageable);
         List<ProductAdminDto> productAdminDtoList = productMapper.fromProductEntityListToAdminDtoList(productPage.getContent());
         return new ApiMessageDto<>(
@@ -182,6 +185,17 @@ public class ProductController extends ABasicController {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Product not found"));
         ProductAdminDto productAdminDto = productMapper.fromProductEntityToAdminDto(product);
+        if(isManager()){
+            Employee employee = employeeRepository.findById(getCurrentUserId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND));
+            for (ProductVariantDto variant : productAdminDto.getProductConfigs().get(0).getVariants()){
+                Stock stock = stockRepository.findFirstByProductVariantIdAndStoreId(variant.getId(),employee.getStore().getId());
+                if(stock != null){
+                    variant.setTotalInStock(stock.getTotal());
+                } else{
+                    variant.setTotalInStock(0);
+                }
+            }
+        }
 /*        if (!productAdminDto.getProductConfigs().isEmpty()){
             List<Long> variantListId = new ArrayList<>();
             for (ProductVariantDto variantDto : productAdminDto.getProductConfigs().get(0).getVariants()){
@@ -296,8 +310,8 @@ public class ProductController extends ABasicController {
     public ApiMessageDto<String> delete(@PathVariable(name = "id") Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Product not found"));
-
-        productRepository.delete(product);
+        product.setStatus(Constants.STATUS_DELETE);
+        //productRepository.delete(product);
         return new ApiMessageDto<>("Delete product successfully");
     }
 }

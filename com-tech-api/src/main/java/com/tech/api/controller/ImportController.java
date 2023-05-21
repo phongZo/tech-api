@@ -51,6 +51,9 @@ public class ImportController extends ABasicController{
     @Autowired
     StockRepository stockRepository;
 
+    @Autowired
+    ProductRepository productRepository;
+
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<ImportDto>> getList(ImportCriteria importCriteria){
         if(!isAdmin() && !isManager()){
@@ -59,6 +62,7 @@ public class ImportController extends ABasicController{
 
         ApiMessageDto<ResponseListObj<ImportDto>> apiMessageDto = new ApiMessageDto<>();
         if(isManager()){
+            importCriteria.setIsManagerShow(true);
             Employee employee = employeeRepository.findById(getCurrentUserId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND));
             importCriteria.setStoreId(employee.getStore().getId());
         }
@@ -158,6 +162,11 @@ public class ImportController extends ABasicController{
             } else{
                 stock.setTotal(stock.getTotal() + item.getQuantity());
                 stockRepository.save(stock);
+            }
+            Product product = productRepository.findById(item.getVariant().getProductConfig().getProduct().getId()).orElse(null);
+            if(product != null) {
+                product.setTotalInStock(product.getTotalInStock() + item.getQuantity());
+                productRepository.save(product);
             }
         }
         importData.setState(Constants.IMPORT_STATE_ACCEPTED);
