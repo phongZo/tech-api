@@ -140,6 +140,7 @@ public class AccountController extends ABasicController{
         if(account.getKind().equals(Constants.USER_KIND_EMPLOYEE) || account.getKind().equals(Constants.USER_KIND_STORE_MANAGER)){
             Employee employee = employeeRepository.findById(account.getId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND, "Not found employee"));
             loginDto.setStoreId(employee.getStore().getId());
+            loginDto.setStoreName(employee.getStore().getName());
         }
         return loginDto;
     }

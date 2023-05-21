@@ -14,4 +14,5 @@ public class LoginDto {
     private Integer kind;
     private Long customerId;
     private Long storeId;
+    private String storeName;
 }
