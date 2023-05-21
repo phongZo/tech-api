@@ -17,10 +17,13 @@ import com.tech.api.jwt.UserJwt;
 import com.tech.api.mapper.EmployeeMapper;
 import com.tech.api.mapper.StoreMapper;
 import com.tech.api.service.RestService;
+import com.tech.api.storage.criteria.ProductCriteria;
 import com.tech.api.storage.criteria.StoreCriteria;
 import com.tech.api.storage.model.Employee;
 import com.tech.api.storage.model.Group;
 import com.tech.api.storage.model.Store;
+import com.tech.api.storage.projection.ProductOrdersDetail;
+import com.tech.api.storage.projection.StoreRevenue;
 import com.tech.api.storage.repository.AccountRepository;
 import com.tech.api.storage.repository.EmployeeRepository;
 import com.tech.api.storage.repository.GroupRepository;
@@ -79,6 +82,25 @@ public class StoreController extends ABasicController {
         Page<Store> storePage = storeRepository.findAll(storeCriteria.getSpecification(), pageable);
         List<StoreDto> storeDtoList = storeMapper.fromStoreEntityListToDtoList(storePage.getContent());
         return new ApiMessageDto<>(new ResponseListObj<>(storeDtoList, storePage), "Get list successfully");
+    }
+
+    // FOR ADMIN
+    @GetMapping(value = "/list-revenue", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<ResponseListObj<StoreRevenue>> revenueList(StoreCriteria storeCriteria, Pageable pageable) {
+        if(!isAdmin()){
+            throw new RequestException(ErrorCode.STORE_ERROR_UNAUTHORIZED);
+        }
+        ApiMessageDto<ResponseListObj<StoreRevenue>> responseListObjApiMessageDto = new ApiMessageDto<>();
+        Page<StoreRevenue> storeRevenuePage = storeRepository.findAllStoreAndRevenue(storeCriteria.getFrom(),storeCriteria.getTo(), pageable);
+        ResponseListObj<StoreRevenue> responseListObj = new ResponseListObj<>();
+        responseListObj.setData(storeRevenuePage.getContent());
+        responseListObj.setPage(pageable.getPageNumber());
+        responseListObj.setTotalPage(storeRevenuePage.getTotalPages());
+        responseListObj.setTotalElements(storeRevenuePage.getTotalElements());
+
+        responseListObjApiMessageDto.setData(responseListObj);
+        responseListObjApiMessageDto.setMessage("Get list success");
+        return responseListObjApiMessageDto;
     }
 
     @GetMapping(value = "/auto-complete", produces = MediaType.APPLICATION_JSON_VALUE)

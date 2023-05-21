@@ -21,7 +21,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             " WHERE (cast(:fromDate as date) IS NULL OR o.createdDate >= :fromDate)" +
             " AND (cast(:toDate as date) IS NULL OR o.createdDate <= :toDate)" +
             " AND (cast(:storeId as long) IS NULL OR o.store.id = :storeId)" +
-            " group by p.id,p.name")
+            " group by p.id,p.name" +
+            " ORDER BY revenue DESC")
     Page<ProductOrdersDetail> findAllProductAndRevenue(@Param("fromDate") Date fromDate,
                                                        @Param("toDate") Date toDate,
                                                        @Param("storeId") Long storeId,

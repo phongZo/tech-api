@@ -50,6 +50,7 @@ public class EmployeeController extends ABasicController {
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<EmployeeAdminDto>> list(EmployeeCriteria employeeCriteria, Pageable pageable) {
+        employeeCriteria.setKind(Constants.USER_KIND_EMPLOYEE);
         Page<Employee> employeePage = employeeRepository.findAll(employeeCriteria.getSpecification(), pageable);
         List<EmployeeAdminDto> employeeAdminDtoList = employeeMapper.fromEmployeeEntityListToAdminDtoList(employeePage.getContent());
         return new ApiMessageDto<>(new ResponseListObj<>(employeeAdminDtoList, employeePage), "Get list successfully");
@@ -57,6 +58,7 @@ public class EmployeeController extends ABasicController {
 
     @GetMapping(value = "/auto-complete", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<List<EmployeeDto>> autoComplete(EmployeeCriteria employeeCriteria) {
+        employeeCriteria.setKind(Constants.USER_KIND_EMPLOYEE);
         Page<Employee> employeePage = employeeRepository.findAll(employeeCriteria.getSpecification(), Pageable.unpaged());
         return new ApiMessageDto<>(
                 employeeMapper.fromListEmployeeEntityToListDto(employeePage.getContent()),
