@@ -20,7 +20,13 @@ public interface StockRepository extends JpaRepository<Stock, Long>, JpaSpecific
     List<Stock> findAllByListProductVariantIdAndStoreId(@Param("variantList") List<Long> variantList,
                                                         @Param("storeId") Long storeId);
 
-    @Query("SELECT st.phone AS phone, st.addressDetails AS addressDetails, st.name AS name " +
+    @Query("SELECT new com.tech.api.dto.productvariant.VariantStockDto(st.addressDetails,st.name,st.phone,COALESCE(s.total,0)) " +
+            "FROM Store st " +
+            "LEFT JOIN Stock s ON s.store = st AND s.productVariant.id = :id " +
+            "GROUP BY st.name, st.id, s.total")
+    List<VariantStockDto> findAllTotalInStockOfStore(@Param("id") Long id);
+
+    @Query("SELECT new com.tech.api.dto.productvariant.VariantStockDto(st.addressDetails,st.name,st.phone,s.total) " +
             "FROM Stock s " +
             "JOIN ProductVariant v ON s.productVariant = v " +
             "JOIN Store st ON s.store = st " +

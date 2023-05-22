@@ -195,6 +195,14 @@ public class ProductController extends ABasicController {
                     variant.setTotalInStock(0);
                 }
             }
+        } else{
+            // admin
+            if (!productAdminDto.getProductConfigs().isEmpty()){
+                for (ProductVariantDto variantDto : productAdminDto.getProductConfigs().get(0).getVariants()){
+                    //variantListId.add(variantDto.getId());
+                    variantDto.setVariantStockDtoList(stockRepository.findAllTotalInStockOfStore(variantDto.getId()));
+                }
+            }
         }
 /*        if (!productAdminDto.getProductConfigs().isEmpty()){
             List<Long> variantListId = new ArrayList<>();
