@@ -12,4 +12,11 @@ public class VariantStockDto {
     private String phone;
 
     private Integer totalInStock;
+
+    public VariantStockDto(String addressDetails, String name, String phone, Integer totalInStock) {
+        this.addressDetails = addressDetails;
+        this.name = name;
+        this.phone = phone;
+        this.totalInStock = totalInStock;
+    }
 }
