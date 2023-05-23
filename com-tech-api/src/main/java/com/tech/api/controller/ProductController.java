@@ -59,7 +59,7 @@ public class ProductController extends ABasicController {
     // for CMS and Store
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<ProductAdminDto>> list(@Valid ProductCriteria productCriteria, BindingResult bindingResult, Pageable pageable) {
-        if(!isAdmin() && !isManager()){
+        if(!isAdmin() && !isManager() && !isEmployee()){
             throw new RequestException(ErrorCode.PRODUCT_UNAUTHORIZED, "Not allowed to get list.");
         }
         Page<Product> productPage = productRepository.findAll(productCriteria.getSpecification(), pageable);
@@ -185,7 +185,7 @@ public class ProductController extends ABasicController {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Product not found"));
         ProductAdminDto productAdminDto = productMapper.fromProductEntityToAdminDto(product);
-        if(isManager()){
+        if(isManager() || isEmployee()){
             Employee employee = employeeRepository.findById(getCurrentUserId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND));
             for (ProductVariantDto variant : productAdminDto.getProductConfigs().get(0).getVariants()){
                 Stock stock = stockRepository.findFirstByProductVariantIdAndStoreId(variant.getId(),employee.getStore().getId());
