@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long>, JpaSpecificationExecutor<Customer> {
     Customer findCustomerByAccountId(Long id);
+    public Customer findCustomerByAccountPhone(String phone);
 }

@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mapbox.geojson.Point;
 import com.tech.api.constant.Constants;
 import com.tech.api.dto.ApiMessageDto;
+import com.tech.api.dto.ghn.DeliveryServiceResponse;
 import com.tech.api.dto.orders.*;
 import com.tech.api.dto.store.StoreDto;
 import com.tech.api.form.orders.*;
 import com.tech.api.mapper.StoreMapper;
 import com.tech.api.service.CommonApiService;
+import com.tech.api.service.GhnApiService;
 import com.tech.api.service.MapboxService;
 import com.tech.api.service.RestService;
 import com.tech.api.storage.model.*;
@@ -23,6 +25,7 @@ import com.tech.api.mapper.OrdersDetailMapper;
 import com.tech.api.mapper.OrdersMapper;
 import com.tech.api.storage.criteria.OrdersCriteria;
 import com.tech.api.utils.Config;
+import com.tech.api.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,11 +114,15 @@ public class OrdersController extends ABasicController{
     @Autowired
     StoreMapper storeMapper;
 
+    @Autowired
+    GhnApiService ghnApiService;
+
     @GetMapping(value = "/list",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<OrdersDto>> list(OrdersCriteria ordersCriteria, Pageable pageable){
         if(!isAdmin()){
             throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED,"Not allowed get list.");
         }
+        ordersCriteria.setIsSaved(true);
         ApiMessageDto<ResponseListObj<OrdersDto>> responseListObjApiMessageDto = new ApiMessageDto<>();
         Page<Orders> listOrders = ordersRepository.findAll(ordersCriteria.getSpecification(), pageable);
         ResponseListObj<OrdersDto> responseListObj = new ResponseListObj<>();
@@ -127,6 +134,114 @@ public class OrdersController extends ABasicController{
         responseListObjApiMessageDto.setData(responseListObj);
         responseListObjApiMessageDto.setMessage("Get list success");
         return responseListObjApiMessageDto;
+    }
+
+    //for employee to create
+    @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional
+    public ApiMessageDto<String> create(@Valid @RequestBody CreateOrdersForm createOrdersForm, BindingResult bindingResult) {
+        if(!isEmployee()) {
+            throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED, "Not allowed to create.");
+        }
+        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
+        if(createOrdersForm.getState().equals(Constants.ORDERS_STATE_WAIT_FOR_PAYMENT) && !createOrdersForm.getIsDelivery()){
+            throw new RequestException(ErrorCode.ORDERS_CREATE_FAILED, "Not delivery order must be paid before create.");
+        }
+        List<OrdersDetail> ordersDetailList = ordersDetailMapper
+                .fromCreateOrdersDetailFormListToOrdersDetailList(createOrdersForm.getCreateOrdersDetailFormList());
+        Orders orders = ordersMapper.fromCreateOrdersFormToEntity(createOrdersForm);
+        setCustomerCreateForm(orders,createOrdersForm);
+        Integer checkSaleOff = createOrdersForm.getSaleOff();
+        if((checkSaleOff < 0) || (checkSaleOff > 100)){
+            throw new RequestException(ErrorCode.ORDERS_ERROR_BAD_REQUEST, "saleOff is not accepted");
+        }
+        Long checkAccountId = getCurrentUserId();
+        Employee checkEmployee = employeeRepository.findById(checkAccountId).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND));
+        orders.setState(Constants.ORDERS_STATE_CREATED);
+        if(orders.getState().equals(Constants.ORDERS_STATE_PAID)) orders.setIsPaid(true);
+        if(!orders.getIsDelivery()) orders.setState(Constants.ORDERS_STATE_COMPLETED);
+        orders.setIsCreatedByEmployee(true);
+        orders.setEmployee(checkEmployee);
+        Orders savedOrder = ordersRepository.save(orders);
+        /*-----------------------Xử lý orders detail------------------ */
+        List<GhnOrderItem> listItem = amountPriceCal(null, orders,ordersDetailList,savedOrder,null);  //Tổng tiền hóa đơn
+        ordersDetailRepository.saveAll(ordersDetailList);
+
+        /*-----------------------Quay lại xử lý orders------------------ */
+        orders.setCode(StringUtils.generateRandomString(6));
+        if(createOrdersForm.getIsDelivery()){
+            CreateOrdersGhnDto dto = sendToGhnApi(orders, createOrdersForm.getServiceId(), createOrdersForm.getServiceType(), listItem);
+            if(dto == null)  throw new RequestException(ErrorCode.ORDERS_CREATE_FAILED);
+            orders.setCode(dto.getOrderCode());
+        }
+        ordersRepository.save(orders);
+        apiMessageDto.setMessage("Create orders success");
+        return apiMessageDto;
+    }
+
+    private void setCustomerCreateForm(Orders orders, CreateOrdersForm createOrdersForm) {
+        Customer customerCheck = customerRepository.findCustomerByAccountPhone(createOrdersForm.getCustomerPhone());
+        if (customerCheck == null) {
+            Account savedAccount = new Account();
+            savedAccount.setPhone(createOrdersForm.getCustomerPhone());
+            savedAccount.setFullName(createOrdersForm.getCustomerName());
+            savedAccount.setKind(Constants.USER_KIND_CUSTOMER);
+
+            Customer savedCustomer = new Customer();
+            savedCustomer.setAccount(savedAccount);
+            //savedCustomer.setIsAdminCreated(true);
+            savedCustomer = customerRepository.save(savedCustomer);
+
+            if(createOrdersForm.getIsDelivery() != null && createOrdersForm.getIsDelivery()){
+                CustomerAddress address = new CustomerAddress();
+                address.setCustomer(savedCustomer);
+                address.setAddressDetails(createOrdersForm.getAddress());
+                address.setProvinceCode(createOrdersForm.getProvinceId());
+                address.setDistrictCode(createOrdersForm.getDistrictId());
+                address.setWardCode(createOrdersForm.getWardCode());
+                address.setReceiverFullName(createOrdersForm.getReceiverName());
+                address.setPhone(createOrdersForm.getCustomerPhone());
+
+                // get the coordinate from address detail
+                Point point = mapboxService.getPoint(address.getAddressDetails());
+                address.setLatitude(point.latitude());
+                address.setLongitude(point.longitude());
+                customerAddressRepository.save(address);
+            }
+            orders.setCustomer(savedCustomer);
+        }
+        else{
+            orders.setCustomer(customerCheck);
+            if(createOrdersForm.getIsDelivery() != null && createOrdersForm.getIsDelivery()){
+                // get the coordinate from address detail
+                Point point = mapboxService.getPoint(createOrdersForm.getAddress());
+
+                CustomerAddress check = customerAddressRepository.findByLatitudeAndLongitudeAndCustomerId(point.latitude(),point.longitude(),customerCheck.getId());
+                if(check != null){
+                    check.setReceiverFullName(createOrdersForm.getReceiverName());
+                    check.setPhone(createOrdersForm.getCustomerPhone());
+                    customerAddressRepository.save(check);
+                } else{
+                    creatNewAddressForCustomer(customerCheck,createOrdersForm,point);
+                }
+
+            }
+        }
+    }
+
+    private void creatNewAddressForCustomer(Customer check, CreateOrdersForm createOrdersForm, Point point) {
+        CustomerAddress address = new CustomerAddress();
+        address.setCustomer(check);
+        address.setAddressDetails(createOrdersForm.getAddress());
+        address.setProvinceCode(createOrdersForm.getProvinceId());
+        address.setDistrictCode(createOrdersForm.getDistrictId());
+        address.setWardCode(createOrdersForm.getWardCode());
+        address.setReceiverFullName(createOrdersForm.getReceiverName());
+        address.setPhone(createOrdersForm.getCustomerPhone());
+
+        address.setLatitude(point.latitude());
+        address.setLongitude(point.longitude());
+        customerAddressRepository.save(address);
     }
 
     // Store
@@ -269,7 +384,7 @@ public class OrdersController extends ABasicController{
     @PutMapping(value = "/cancel-orders/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public ApiMessageDto<String> cancelOrders(@PathVariable("id") Long id) {
-        if (!isAdmin() && !isManager()) {
+        if (!isAdmin() && !isManager() && !isEmployee()) {
             throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED, "Not allowed to cancel orders.");
         }
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
@@ -281,6 +396,18 @@ public class OrdersController extends ABasicController{
         Integer prevState = orders.getState();
         orders.setState(Constants.ORDERS_STATE_CANCELED);
         orders.setPrevState(prevState);
+        if(orders.getCustomerPromotionId() != null){
+            CustomerPromotion customerPromotion = customerPromotionRepository.findById(orders.getCustomerPromotionId()).orElse(null);
+            if(customerPromotion != null){
+                customerPromotion.setIsInUse(false);
+                customerPromotionRepository.save(customerPromotion);
+            }
+        }
+        if(orders.getPaymentMethod().equals(Constants.PAYMENT_METHOD_ONLINE)){
+            Customer customer = customerRepository.findById(getCurrentCustomer().getId()).orElse(null);
+            customer.setWalletMoney(customer.getWalletMoney() + orders.getTotalMoney());
+            customerRepository.save(customer);
+        }
         requestToGhnApi(orders);
         ordersRepository.save(orders);
 
@@ -295,6 +422,21 @@ public class OrdersController extends ABasicController{
         GhnCancelOrdersForm form = new GhnCancelOrdersForm();
         form.setOrderCodes(ordersId);
         ApiMessageDto<List<GhnCancelOrderResponse>> result = restService.POST_FOR_LIST(orders.getStore().getShopId(),form,base,null, GhnCancelOrderResponse.class);
+    }
+
+    @PostMapping(value = "/get-delivery-service", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<DeliveryServiceResponse> getDeliveryService(@RequestBody @Valid EmployeeGetDeliveryServiceForm form, BindingResult bindingResult) {
+        ApiMessageDto<DeliveryServiceResponse> result = new ApiMessageDto<>();
+
+        Employee employee = employeeRepository.findById(getCurrentUserId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND));
+        Store store = storeRepository.findById(employee.getStore().getId()).orElseThrow(() -> new RequestException(ErrorCode.STORE_ERROR_NOT_FOUND));
+        DeliveryServiceResponse response = ghnApiService.getDeliveryService(form.getDistrictId(),form.getWardCode(),store.getDistrictCode(),store.getShopId(),store.getWardCode());
+        if(response == null){
+            throw new RequestException(ErrorCode.ORDERS_GET_SERVICE_FAILED, "Can not get service");
+        }
+        result.setData(response);
+        result.setMessage("Get service success");
+        return result;
     }
 
     @GetMapping(value = "/client-get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -352,9 +494,12 @@ public class OrdersController extends ABasicController{
 
         List<OrdersDetail> ordersDetailList = ordersDetailMapper
                 .fromCreateOrdersDetailFormListToOrdersDetailList(createOrdersForm.getCreateOrdersDetailFormList());
-        Orders orders = ordersMapper.fromCreateOrdersFormToEntity(createOrdersForm);
+        Orders orders = ordersMapper.fromClientCreateOrdersFormToEntity(createOrdersForm);
         orders.setStore(store);
         orders.setAddress(address);
+        orders.setIsPaid(false);
+        orders.setIsDelivery(true);
+        if(orders.getPaymentMethod().equals(Constants.PAYMENT_METHOD_ONLINE)) orders.setIsPaid(true);
         setCustomerClient(orders,createOrdersForm);
         Double checkSaleOff = createOrdersForm.getSaleOff();
         if(checkSaleOff < 0){
@@ -396,7 +541,7 @@ public class OrdersController extends ABasicController{
         // update each product in stock
         //updateStock(ordersDetailList,orders);
         // send to GHN
-        CreateOrdersGhnDto dto = sendToGhnApi(orders, createOrdersForm, listItem);
+        CreateOrdersGhnDto dto = sendToGhnApi(orders, createOrdersForm.getServiceId(), createOrdersForm.getServiceTypeId(), listItem);
         if(dto == null)  throw new RequestException(ErrorCode.ORDERS_CREATE_FAILED);
         orders.setCode(dto.getOrderCode());
         ordersRepository.save(orders);
@@ -411,7 +556,7 @@ public class OrdersController extends ABasicController{
         return apiMessageDto;
     }
 
-    private CreateOrdersGhnDto sendToGhnApi(Orders orders, CreateOrdersClientForm createOrdersForm, List<GhnOrderItem> itemList) {
+    private CreateOrdersGhnDto sendToGhnApi(Orders orders, Integer serviceId, Integer serviceType, List<GhnOrderItem> itemList) {
         String provinceName = orders.getAddress().getAddressDetails().split(",")[orders.getAddress().getAddressDetails().split(",").length - 1].substring(1);   // city
         String districtName = orders.getAddress().getAddressDetails().split(",")[orders.getAddress().getAddressDetails().split(",").length - 2].substring(1);   // district
         String wardName = orders.getAddress().getAddressDetails().split(",")[orders.getAddress().getAddressDetails().split(",").length - 3].substring(1);   // ward
@@ -433,8 +578,8 @@ public class OrdersController extends ABasicController{
         form.setLength(1);
         form.setWidth(20);
         form.setInsuranceValue(orders.getTotalMoney().intValue() > Constants.INSURANCE_FEE ? Constants.INSURANCE_FEE : orders.getTotalMoney().intValue());
-        form.setServiceId(createOrdersForm.getServiceId());
-        form.setServiceTypeId(createOrdersForm.getServiceTypeId());
+        form.setServiceId(serviceId);
+        form.setServiceTypeId(serviceType);
         form.setItems(itemList);
 
         String base = "/shiip/public-api/v2/shipping-order/create";
@@ -585,6 +730,7 @@ public class OrdersController extends ABasicController{
             customerRepository.save(customer);
         }
         ordersRepository.save(orders);
+        requestToGhnApi(orders);
         apiMessageDto.setMessage("Cancel order success");
         return apiMessageDto;
     }
@@ -627,7 +773,7 @@ public class OrdersController extends ABasicController{
                 productRepository.save(productCheck);
             }
             // update loyalty point and point
-            Customer customer = orders.getCustomer();
+            Customer customer = customerRepository.findCustomerByAccountId(orders.getCustomer().getId());
             if(customer != null){
                 int orderPoint = (int) (orders.getTotalMoney() / 1000);
                 // up level
@@ -698,8 +844,9 @@ public class OrdersController extends ABasicController{
             listItem.add(item);
         }
         orders.setAmount(amount);
-        amountPrice += deliveryFee;
-        Double totalMoney = totalMoneyHaveToPay(amountPrice,orders,promotion);
+        Double totalMoney = 0d;
+        if(deliveryFee != null) amountPrice += deliveryFee;
+        if(promotion != null) totalMoney = totalMoneyHaveToPay(amountPrice,orders,promotion);
         orders.setSaleOffMoney(amountPrice - totalMoney);
         orders.setTotalMoney(totalMoney);
         return listItem;

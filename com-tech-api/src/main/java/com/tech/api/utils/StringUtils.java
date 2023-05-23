@@ -2,6 +2,8 @@ package com.tech.api.utils;
 
 import org.apache.commons.lang.RandomStringUtils;
 
+import java.util.Locale;
+
 
 public class StringUtils {
     public static String cleanString(String str) {
@@ -25,6 +27,6 @@ public class StringUtils {
     }
 
     public static String generateRandomString(int length) {
-        return RandomStringUtils.randomAlphanumeric(length).toLowerCase();
+        return RandomStringUtils.randomAlphanumeric(length).toUpperCase(Locale.ROOT);
     }
 }

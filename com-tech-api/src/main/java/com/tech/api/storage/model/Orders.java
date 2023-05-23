@@ -23,6 +23,9 @@ public class Orders extends Auditable<String>{
     private Store store;
 
     private Integer amount;
+    private Boolean isCreatedByEmployee = false;
+    private Boolean isDelivery = true;
+    private Boolean isPaid = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
