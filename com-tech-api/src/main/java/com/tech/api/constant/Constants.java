@@ -43,6 +43,8 @@ public class Constants {
     public static final Integer ORDERS_STATE_COMPLETED = 3;
     public static final Integer ORDERS_STATE_CANCELED = 4;
     public static final Integer ORDERS_STATE_ARCHIVE = 5;
+    public static final Integer ORDERS_STATE_WAIT_FOR_PAYMENT = 6;
+    public static final Integer ORDERS_STATE_PAID = 7;
 
     public static final Integer ORDER_VAT = 10;
 

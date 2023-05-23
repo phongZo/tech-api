@@ -23,7 +23,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Long>, JpaSpecif
 
     @Transactional()
     @Modifying(clearAutomatically = true)
-    @Query(value = "UPDATE tech_orders SET state = 5 WHERE state = 3 OR state = 4",nativeQuery = true)
+    @Query(value = "UPDATE tech_orders SET isSaved = true WHERE state = 3 OR state = 4",nativeQuery = true)
     void updateArchive();
 
     @Query("SELECT COUNT(o.id) as totalOrders, COALESCE(SUM(o.totalMoney - o.deliveryFee),0) AS revenue, COALESCE(SUM(o.saleOffMoney),0) AS discount" +

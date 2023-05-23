@@ -25,6 +25,7 @@ public class OrdersCriteria {
     private Integer status;
     private Date from;
     private Date to;
+    private Boolean isSaved;
 
     public Specification<Orders> getSpecification() {
         return new Specification<Orders>() {
@@ -39,6 +40,9 @@ public class OrdersCriteria {
                 if(getEmployeeId() != null){
                     Join<Store, Employee> joinEmployee = root.join("employee", JoinType.INNER);
                     predicates.add(cb.equal(joinEmployee.get("id"), getEmployeeId()));
+                }
+                if (getIsSaved() != null && getIsSaved()){
+                    predicates.add(cb.equal(root.get("isSaved"), true));
                 }
                 if (getPaymentMethod() != null){
                     predicates.add(cb.equal(root.get("paymentMethod"),getPaymentMethod()));

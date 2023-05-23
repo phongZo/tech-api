@@ -25,6 +25,8 @@ public class OrdersDto extends ABasicAdminDto {
     private LocalDate expectedReceiveDate;
     private String note;
     private Double saleOffMoney;
+    private Boolean isPaid = false;
+    private Boolean isDelivery = false;
     private CustomerAddressDto customerAddressDto;
     private List<OrdersDetailDto> ordersDetailDtoList;
 }
