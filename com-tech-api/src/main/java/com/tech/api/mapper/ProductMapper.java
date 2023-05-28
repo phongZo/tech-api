@@ -38,6 +38,7 @@ public interface ProductMapper {
     @Mapping(source = "image", target = "image")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
     @Mapping(source = "category.id", target = "productCategoryId")
+    @Mapping(source = "totalInStock", target = "totalInStock")
     @Mapping(source = "avgStar", target = "avgStar")
     @Mapping(source = "totalReview", target = "totalReview")
     @Mapping(source = "soldAmount", target = "soldAmount")
