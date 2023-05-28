@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.List;
 
 public interface StoreRepository extends JpaRepository<Store, Long>, JpaSpecificationExecutor<Store> {
-    Store findByPosId(String posId);
 
     @Query("SELECT s FROM Store s" +
             " JOIN Stock st ON st.store = s" +
