@@ -14,9 +14,6 @@ public class Store extends Auditable<String> {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String posId;
-    @JsonIgnore
-    private String sessionId;
 
     @Column(name = "name")
     private String name;

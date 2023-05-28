@@ -122,7 +122,7 @@ public class CommonApiService {
 
 
     public String getOTPForgetPassword(){
-        return OTPService.generate(4);
+        return OTPService.generate(6);
     }
 
     public String getOTPValidateEmail(){

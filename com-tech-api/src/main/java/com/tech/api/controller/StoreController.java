@@ -132,23 +132,6 @@ public class StoreController extends ABasicController {
         return apiMessageDto;
     }
 
-    @PostMapping(value = "/verify-device", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<VerifyStoreDto> verifyDevice(@Valid @RequestBody VerifyDeviceForm verifyDeviceForm, BindingResult bindingResult) {
-        ApiMessageDto<VerifyStoreDto> apiMessageDto = new ApiMessageDto<>();
-        Store store = storeRepository.findByPosId(verifyDeviceForm.getPosId());
-        if (store == null || !verifyDeviceForm.getSessionId().equals(store.getSessionId()) || !Objects.equals(store.getStatus() , Constants.STATUS_ACTIVE)) {
-            throw new RequestException(ErrorCode.STORE_ERROR_VERIFY, "Login fail, check your posId or sessionId");
-        }
-        VerifyStoreDto dto = new VerifyStoreDto();
-        dto.setToken(generateJWT(store));
-        dto.setId(store.getId());
-        dto.setName(store.getName());
-        dto.setIsAcceptOrder(store.getIsAcceptOrder());
-        apiMessageDto.setData(dto);
-        apiMessageDto.setMessage("Login store success");
-        return apiMessageDto;
-    }
-
     @PostMapping(value = "/create_manager", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<String> create(@Valid @RequestBody CreateEmployeeForm createEmployeeForm, BindingResult bindingResult) {
         if (accountRepository.countAccountByUsernameOrEmailOrPhone(
@@ -167,23 +150,6 @@ public class StoreController extends ABasicController {
         employee.setStore(store);
         employeeRepository.save(employee);
         return new ApiMessageDto<>("Create employee successfully");
-    }
-
-    private String generateJWT(Store store) {
-        LocalDate parsedDate = LocalDate.now();
-        parsedDate = parsedDate.plusDays(7);
-
-        UserJwt qrJwt = new UserJwt();
-        qrJwt.setPosId(store.getId());
-        String appendStringRole = Constants.POS_DEVICE_PERMISSION;
-        qrJwt.setDeviceId(store.getPosId());
-        qrJwt.setPemission(appendStringRole);
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(new MyAuthentication(qrJwt));
-
-        log.info("jwt user ne: {}", qrJwt);
-        return JWTUtils.createJWT(JWTUtils.ALGORITHMS_HMAC, "authenticationToken.getId().toString()", qrJwt, DateUtils.convertToDateViaInstant(parsedDate));
-
     }
 
     @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)

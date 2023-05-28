@@ -56,6 +56,9 @@ public class ProductController extends ABasicController {
     @Autowired
     EmployeeRepository employeeRepository;
 
+    @Autowired
+    ProductVariantRepository productVariantRepository;
+
     // for CMS and Store
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<ProductAdminDto>> list(@Valid ProductCriteria productCriteria, BindingResult bindingResult, Pageable pageable) {
@@ -246,11 +249,12 @@ public class ProductController extends ABasicController {
             }
         }
         if (!productDto.getProductConfigs().isEmpty()){
-            List<Long> variantListId = new ArrayList<>();
             for (ProductVariantDto variantDto : productDto.getProductConfigs().get(0).getVariants()){
-                variantListId.add(variantDto.getId());
+                //variantListId.add(variantDto.getId());
+                ProductVariant variant = productVariantRepository.findById(variantDto.getId()).orElse(null);
+                if(variant == null) continue;
+                variantDto.setTotalInStock(variant.getTotalInStock());
             }
-            productDto.setStockDtoList(stockRepository.findAllStocksHaveVariant(variantListId));
         }
         return new ApiMessageDto<>(productDto, "Get product successfully");
     }
