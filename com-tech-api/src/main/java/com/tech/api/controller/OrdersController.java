@@ -325,7 +325,7 @@ public class OrdersController extends ABasicController{
 
     @GetMapping(value = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<OrdersDto> get(@PathVariable("id") Long id) {
-        if(!isAdmin()){
+        if(!isAdmin() && !isManager() && !isEmployee()){
             throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED, "Not allowed get.");
         }
         ApiMessageDto<OrdersDto> result = new ApiMessageDto<>();
