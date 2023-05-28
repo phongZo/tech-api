@@ -404,9 +404,9 @@ public class OrdersController extends ABasicController{
             }
         }
         if(orders.getPaymentMethod().equals(Constants.PAYMENT_METHOD_ONLINE)){
-            Customer customer = customerRepository.findById(getCurrentCustomer().getId()).orElse(null);
+            /*Customer customer = customerRepository.findById(getCurrentCustomer().getId()).orElse(null);
             customer.setWalletMoney(customer.getWalletMoney() + orders.getTotalMoney());
-            customerRepository.save(customer);
+            customerRepository.save(customer);*/
         }
         requestToGhnApi(orders);
         ordersRepository.save(orders);
@@ -516,7 +516,7 @@ public class OrdersController extends ABasicController{
 
         // check wallet money if not have enough money
         if(createOrdersForm.getPaymentMethod().equals(Constants.PAYMENT_METHOD_ONLINE)){
-            Customer customer = getCurrentCustomer();
+            /*Customer customer = getCurrentCustomer();
             if(customer.getWalletMoney() < orders.getTotalMoney()){
                 ordersRepository.delete(savedOrder);
                 apiMessageDto.setResult(false);
@@ -525,7 +525,7 @@ public class OrdersController extends ABasicController{
             } else {
                 customer.setWalletMoney(customer.getWalletMoney() - orders.getTotalMoney());
                 customerRepository.save(customer);
-            }
+            }*/
         }
         ordersDetailRepository.saveAll(ordersDetailList);
 
@@ -725,9 +725,9 @@ public class OrdersController extends ABasicController{
             }
         }
         if(orders.getPaymentMethod().equals(Constants.PAYMENT_METHOD_ONLINE)){
-            Customer customer = customerRepository.findById(getCurrentCustomer().getId()).orElse(null);
+            /*Customer customer = customerRepository.findById(getCurrentCustomer().getId()).orElse(null);
             customer.setWalletMoney(customer.getWalletMoney() + orders.getTotalMoney());
-            customerRepository.save(customer);
+            customerRepository.save(customer);*/
         }
         ordersRepository.save(orders);
         requestToGhnApi(orders);

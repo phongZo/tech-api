@@ -21,9 +21,6 @@ public class Customer extends Auditable<String> {
     @JoinColumn(name = "account_id")
     private Account account;
 
-    @Column(name = "wallet_money")
-    private Double walletMoney = 0d;
-
     private Integer gender;
     
     private LocalDate birthday;

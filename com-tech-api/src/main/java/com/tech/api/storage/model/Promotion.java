@@ -25,6 +25,6 @@ public class Promotion extends Auditable<String>{
 
     @Column(name = "loyalty_level")
     private Integer loyaltyLevel;
-    private Double point;
+    private Integer point;
     private Boolean exchangeable = false;
 }

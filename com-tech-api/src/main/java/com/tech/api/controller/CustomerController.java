@@ -296,25 +296,6 @@ public class CustomerController extends ABasicController {
         return new ApiMessageDto<>("Create customer successfully");
     }
 
-    @PostMapping(value = "/wallet-recharge", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<String> WalletRecharge(@Valid @RequestBody RechargeForm rechargeForm, BindingResult bindingResult) {
-        if(!isCustomer()){
-            throw new RequestException(ErrorCode.CUSTOMER_ERROR_UNAUTHORIZED, "Not allow recharge");
-        }
-        Customer customer = customerRepository.findCustomerByAccountId(getCurrentUserId());
-        if(customer == null){
-            throw new RequestException(ErrorCode.CUSTOMER_ERROR_NOT_FOUND, "Customer not found");
-        }
-        Double currentWalletMoney = customer.getWalletMoney();
-        if(currentWalletMoney + rechargeForm.getRechargeMoney() != rechargeForm.getTotalMoney()){
-            throw new RequestException(ErrorCode.CUSTOMER_RECHARGE_BAD_REQUEST, "Invalid recharge money");
-        }
-        currentWalletMoney += rechargeForm.getRechargeMoney();
-        customer.setWalletMoney(currentWalletMoney);
-        customerRepository.save(customer);
-        return new ApiMessageDto<>("Recharge successfully");
-    }
-
     @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<String> update(@Valid @RequestBody UpdateCustomerForm updateCustomerForm, BindingResult bindingResult) {
         if (accountRepository.countAccountByPhoneOrEmail(

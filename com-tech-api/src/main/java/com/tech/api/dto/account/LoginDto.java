@@ -15,4 +15,5 @@ public class LoginDto {
     private Long customerId;
     private Long storeId;
     private String storeName;
+    private Boolean isSuperAdmin = false;
 }
