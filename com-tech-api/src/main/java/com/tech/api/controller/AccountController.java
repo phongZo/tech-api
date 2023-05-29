@@ -137,6 +137,7 @@ public class AccountController extends ABasicController{
         loginDto.setToken(token);
         loginDto.setUsername(account.getUsername());
         loginDto.setKind(account.getKind());
+        if(account.getKind().equals(Constants.USER_KIND_ADMIN) && account.getIsSuperAdmin()) loginDto.setIsSuperAdmin(true);
         if(account.getKind().equals(Constants.USER_KIND_EMPLOYEE) || account.getKind().equals(Constants.USER_KIND_STORE_MANAGER)){
             Employee employee = employeeRepository.findById(account.getId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND, "Not found employee"));
             loginDto.setStoreId(employee.getStore().getId());
