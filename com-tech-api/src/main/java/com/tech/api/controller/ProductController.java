@@ -85,6 +85,7 @@ public class ProductController extends ABasicController {
         if(productCriteria.getCustomerId() != null){
             customerCheck = customerRepository.findById(productCriteria.getCustomerId()).orElse(null);
         }
+        productCriteria.setStatus(Constants.STATUS_ACTIVE);
         Page<Product> productList = productRepository.findAll(productCriteria.getSpecification(), pageable);
         ResponseListObj<ProductDto> responseListObj = new ResponseListObj<>();
         if(productCriteria.getCustomerId() == null || customerCheck == null){
