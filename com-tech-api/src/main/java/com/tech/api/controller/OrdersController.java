@@ -830,7 +830,7 @@ public class OrdersController extends ABasicController{
             }
             Double productPrice = variant.getPrice();
             if(productCheck.getIsSaleOff()){
-                productPrice = productPrice - (productPrice * productCheck.getSaleOff() / 100);
+                productPrice = productPrice - (productPrice * (float)(productCheck.getSaleOff() / 100));
             }
             amountPrice = amountPrice + productPrice * (ordersDetail.getAmount()); // Tổng tiền 1 sp
             ordersDetail.setPrice(productPrice * ordersDetail.getAmount());
@@ -846,7 +846,7 @@ public class OrdersController extends ABasicController{
         orders.setAmount(amount);
         Double totalMoney = 0d;
         if(deliveryFee != null) amountPrice += deliveryFee;
-        if(promotion != null) totalMoney = totalMoneyHaveToPay(amountPrice,orders,promotion);
+        totalMoney = totalMoneyHaveToPay(amountPrice,orders,promotion);
         orders.setSaleOffMoney(amountPrice - totalMoney);
         orders.setTotalMoney(totalMoney);
         return listItem;
