@@ -198,10 +198,9 @@ public class ImportController extends ABasicController{
             throw new RequestException(ErrorCode.IMPORT_ERROR_UNAUTHORIZED);
         }
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-        Employee employee = employeeRepository.findById(getCurrentUserId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND));
         Import importData = importRepository.findById(cancelImportForm.getImportId()).orElseThrow(() -> new RequestException(ErrorCode.IMPORT_ERROR_NOT_FOUND));
-        if(!importData.getStore().getId().equals(employee.getStore().getId()) || !importData.getState().equals(Constants.IMPORT_STATE_PENDING)){
-            throw new RequestException(ErrorCode.IMPORT_ERROR_NOT_FOUND);
+        if(!importData.getState().equals(Constants.IMPORT_STATE_PENDING)){
+            throw new RequestException(ErrorCode.IMPORT_ERROR_NOT_FOUND, "Wrong state");
         }
         importData.setState(Constants.IMPORT_STATE_CANCELED);
         importRepository.save(importData);
