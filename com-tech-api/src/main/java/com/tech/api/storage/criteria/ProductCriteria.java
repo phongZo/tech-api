@@ -37,6 +37,7 @@ public class ProductCriteria {
     private Date from;
     private Date to;
     private Long storeId;
+    private Integer status;
 
     public Specification<Product> getSpecification() {
         return (root, criteriaQuery, cb) -> {
@@ -57,6 +58,9 @@ public class ProductCriteria {
 
             if (getName() != null) {
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + getName().toLowerCase() + ""));
+            }
+            if(getStatus() != null){
+                predicates.add(cb.equal(root.get("status"), getStatus()));
             }
 
             if (getIsSaleOff() != null){
