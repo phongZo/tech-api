@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Slf4j
@@ -104,6 +105,12 @@ public class DateUtils {
 				.atOffset(ZoneOffset.UTC);
 		OffsetDateTime reallyEndOfDay = offsetDateTime.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
 		return Date.from(reallyEndOfDay.toLocalDateTime().toInstant(ZoneOffset.UTC));
+	}
+
+	public static String formatLocalDate(LocalDate date){
+		// Format the LocalDate using a specific pattern
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		return date.format(formatter);
 	}
 
 }
