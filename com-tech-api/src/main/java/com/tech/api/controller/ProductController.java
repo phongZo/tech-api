@@ -263,9 +263,16 @@ public class ProductController extends ABasicController {
 
         // add to customer view
         if(customerId != null){
-            CustomerViewProduct view = new CustomerViewProduct();
-            view.setCustomer(getCurrentCustomer());
-            view.setProduct(product);
+            Customer customer = getCurrentCustomer();
+            CustomerViewProduct view = customerViewProductRepository.findFirstByCustomerIdAndProductId(customer.getId(),product.getId());
+            if(view == null){
+                view = new CustomerViewProduct();
+                view.setCustomer(customer);
+                view.setProduct(product);
+                view.setTotal(0);
+            } else {
+                view.setTotal(view.getTotal() + 1);
+            }
             view.setTimestamp(new Date().getTime());
             customerViewProductRepository.save(view);
         }
