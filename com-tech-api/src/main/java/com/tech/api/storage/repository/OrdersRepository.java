@@ -44,7 +44,8 @@ public interface OrdersRepository extends JpaRepository<Orders, Long>, JpaSpecif
             "AND EXTRACT(YEAR FROM o.created_date) = :year " +
             "AND o.state = 3 " +
             "AND (:storeId IS NULL OR o.store_id = :storeId)" +
-            "GROUP BY m.month",
+            "GROUP BY m.month " +
+            "ORDER BY m.month ASC",
             nativeQuery = true)
     List<RevenueMonthly> getRevenueMonthlyForManager(@Param("year") Integer year,
                                            @Param("storeId") Long storeId);
