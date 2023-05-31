@@ -25,6 +25,7 @@ import com.tech.api.mapper.OrdersDetailMapper;
 import com.tech.api.mapper.OrdersMapper;
 import com.tech.api.storage.criteria.OrdersCriteria;
 import com.tech.api.utils.Config;
+import com.tech.api.utils.CurrencyUtils;
 import com.tech.api.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateUtils;
@@ -116,6 +117,9 @@ public class OrdersController extends ABasicController{
 
     @Autowired
     GhnApiService ghnApiService;
+
+    @Autowired
+    CommonApiService commonApiService;
 
     @GetMapping(value = "/list",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<OrdersDto>> list(OrdersCriteria ordersCriteria, Pageable pageable){
@@ -552,8 +556,64 @@ public class OrdersController extends ABasicController{
         lineItemRepository.deleteAll(list);
         cartRepository.save(cart);
 
+        // send to email
+        String htmlContent = getHtmlContent(orders,ordersDetailList);
+        commonApiService.sendEmail(orders.getCustomer().getAccount().getEmail(),htmlContent,"Xác nhận đơn hàng",true);
+
         apiMessageDto.setMessage("Create orders success");
         return apiMessageDto;
+    }
+
+    private String getHtmlContent(Orders orders, List<OrdersDetail> ordersDetailList) {
+        StringBuilder htmlBuilder = new StringBuilder();
+        htmlBuilder.append("<html><body>");
+        htmlBuilder.append("<h1>Thông tin đơn hàng</h1>");
+        htmlBuilder.append("<div>");
+        htmlBuilder.append("Mã đơn hàng: ");
+        htmlBuilder.append("<b>").append(orders.getCode()).append("</b>");
+        htmlBuilder.append("</div>");
+        htmlBuilder.append("<div>");
+        htmlBuilder.append("Thời gian nhận hàng dự kiến: ");
+        htmlBuilder.append("<b>").append(com.tech.api.utils.DateUtils.formatLocalDate(orders.getExpectedReceiveDate())).append("</b>");
+        htmlBuilder.append("</div>");
+        // Add a wrapper div to hold the table and area
+        htmlBuilder.append("<div>");
+        htmlBuilder.append("<table style=\"border-collapse: collapse; margin-bottom: 20px;\">");
+
+        // Add table rows with order details
+        htmlBuilder.append("<tr style=\"text-align: center;\">");
+        htmlBuilder.append("<th style=\"border: 1px solid black; padding: 10px;\">Sản phẩm</th>");
+        htmlBuilder.append("<th style=\"border: 1px solid black; padding: 10px;\">Đơn giá</th>");
+        htmlBuilder.append("<th style=\"border: 1px solid black; padding: 10px;\">Số lượng</th>");
+        htmlBuilder.append("<th style=\"border: 1px solid black; padding: 10px;\">Thành tiền</th>");
+        htmlBuilder.append("</tr>");
+        for (OrdersDetail item : ordersDetailList) {
+            htmlBuilder.append("<tr style=\"text-align: center;\">");
+            htmlBuilder.append("<td style=\"border: 1px solid black; padding: 10px;\">").append(item.getProductVariant().getProductConfig().getProduct().getName()).append(" - (").append("<i>").append(item.getProductVariant().getName()).append("</i>").append(")").append("</td>");
+            htmlBuilder.append("<td style=\"border: 1px solid black; padding: 10px;\">").append(CurrencyUtils.convertCurrency((double) item.getPrice() / item.getAmount())).append("</td>");
+            htmlBuilder.append("<td style=\"border: 1px solid black; padding: 10px;\">").append(item.getAmount()).append("</td>");
+            htmlBuilder.append("<td style=\"border: 1px solid black; padding: 10px;\">").append(CurrencyUtils.convertCurrency(item.getPrice())).append("</td>");
+            htmlBuilder.append("</tr>");
+        }
+        htmlBuilder.append("</table>");
+
+        // Calculate the width of the table
+        int tableWidth = ordersDetailList.size() * 150; // Assuming each column has a width of 150px
+
+        htmlBuilder.append("<div style=\"display: flex; justify-content: end;\">");
+        htmlBuilder.append("<div>");
+        htmlBuilder.append("<div>Tạm tính: ").append("<b>").append(CurrencyUtils.convertCurrency(orders.getTempPrice())).append("</b>").append("</div>");
+        htmlBuilder.append("<div>Phí giao hàng: ").append("<b>").append(CurrencyUtils.convertCurrency(orders.getDeliveryFee())).append("</b>").append("</div>");
+        htmlBuilder.append("<div>Giảm giá: ").append("<b>").append(CurrencyUtils.convertCurrency(orders.getSaleOffMoney())).append("</b>").append("</div>");
+        htmlBuilder.append("<div>Tổng: ").append("<b>").append(CurrencyUtils.convertCurrency(orders.getTotalMoney())).append("</b>").append("</div>");
+        htmlBuilder.append("<div>Số tiền cần trả: ").append("<b>").append(orders.getIsPaid() ? 0 : CurrencyUtils.convertCurrency(orders.getTotalMoney())).append("</b>").append("</div>");
+        htmlBuilder.append("</div>");
+        htmlBuilder.append("</div>");
+        htmlBuilder.append("</div>"); // Close the container div
+
+        htmlBuilder.append("</body></html>");
+
+        return htmlBuilder.toString();
     }
 
     private CreateOrdersGhnDto sendToGhnApi(Orders orders, Integer serviceId, Integer serviceType, List<GhnOrderItem> itemList) {
@@ -835,6 +895,7 @@ public class OrdersController extends ABasicController{
             amountPrice = amountPrice + productPrice * (ordersDetail.getAmount()); // Tổng tiền 1 sp
             ordersDetail.setPrice(productPrice * ordersDetail.getAmount());
             ordersDetail.setOrders(savedOrder);
+            ordersDetail.setProductVariant(variant);
             checkIndex++;
 
             GhnOrderItem item = new GhnOrderItem();
@@ -843,6 +904,7 @@ public class OrdersController extends ABasicController{
             item.setQuantity(ordersDetail.getAmount());
             listItem.add(item);
         }
+        orders.setTempPrice(amountPrice);
         orders.setAmount(amount);
         Double totalMoney = 0d;
         if(deliveryFee != null) amountPrice += deliveryFee;
