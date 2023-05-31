@@ -59,6 +59,9 @@ public class ProductController extends ABasicController {
     @Autowired
     ProductVariantRepository productVariantRepository;
 
+    @Autowired
+    CustomerViewProductRepository customerViewProductRepository;
+
     // for CMS and Store
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<ProductAdminDto>> list(@Valid ProductCriteria productCriteria, BindingResult bindingResult, Pageable pageable) {
@@ -256,6 +259,15 @@ public class ProductController extends ABasicController {
                 if(variant == null) continue;
                 variantDto.setTotalInStock(variant.getTotalInStock());
             }
+        }
+
+        // add to customer view
+        if(customerId != null){
+            CustomerViewProduct view = new CustomerViewProduct();
+            view.setCustomer(getCurrentCustomer());
+            view.setProduct(product);
+            view.setTimestamp(new Date().getTime());
+            customerViewProductRepository.save(view);
         }
         return new ApiMessageDto<>(productDto, "Get product successfully");
     }
