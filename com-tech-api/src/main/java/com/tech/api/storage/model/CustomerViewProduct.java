@@ -22,5 +22,7 @@ public class CustomerViewProduct {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    private Integer total;
+
     private Long timestamp;
 }
