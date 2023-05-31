@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Date;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
-    @Query("SELECT p.id as id, p.name as name,  COALESCE(SUM(CASE WHEN (o.state = 3) THEN (od.price * od.amount) ELSE 0 END), 0) as revenue,  COALESCE(SUM(od.amount), 0) as amount" +
+    @Query("SELECT p.id as id, p.name as name,  COALESCE(SUM(CASE WHEN (o.state = 3) THEN SUM(od.price * od.amount) ELSE 0 END), 0) as revenue,  COALESCE(SUM(od.amount), 0) as amount" +
             " FROM Product p" +
             " LEFT JOIN ProductConfig c ON p = c.product" +
             " LEFT JOIN ProductVariant variant ON variant.productConfig = c" +
