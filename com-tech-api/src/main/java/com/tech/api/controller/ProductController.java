@@ -263,7 +263,7 @@ public class ProductController extends ABasicController {
 
         // add to customer view
         if(customerId != null){
-            Customer customer = getCurrentCustomer();
+            Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new RequestException(ErrorCode.CUSTOMER_ERROR_NOT_FOUND));
             CustomerViewProduct view = customerViewProductRepository.findFirstByCustomerIdAndProductId(customer.getId(),product.getId());
             if(view == null){
                 view = new CustomerViewProduct();
