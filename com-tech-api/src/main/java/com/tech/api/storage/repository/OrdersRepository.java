@@ -57,7 +57,8 @@ public interface OrdersRepository extends JpaRepository<Orders, Long>, JpaSpecif
             "LEFT JOIN tech_orders o ON m.month = EXTRACT(MONTH FROM o.created_date) " +
             "AND EXTRACT(YEAR FROM o.created_date) = :year " +
             "AND o.state = 3 " +
-            "GROUP BY m.month",
+            "GROUP BY m.month " +
+            "ORDER BY m.month ASC",
             nativeQuery = true)
     List<RevenueMonthly> getRevenueMonthly(@Param("year") Integer year);
 }
