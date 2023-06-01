@@ -1,9 +1,11 @@
 package com.tech.api.mapper;
 
+import com.tech.api.dto.product.CustomerViewDto;
 import com.tech.api.dto.product.ProductAdminDto;
 import com.tech.api.dto.product.ProductDto;
 import com.tech.api.form.product.CreateProductForm;
 import com.tech.api.form.product.UpdateProductForm;
+import com.tech.api.storage.model.CustomerViewProduct;
 import com.tech.api.storage.model.Product;
 import org.mapstruct.*;
 
@@ -49,6 +51,17 @@ public interface ProductMapper {
 
     @IterableMapping(elementTargetType = ProductDto.class, qualifiedByName = "clientGetMapping")
     List<ProductDto> fromEntityListToProductClientDtoList(List<Product> products);
+
+    @Mapping(source = "customer.id", target = "customerId")
+    @Mapping(source = "product.id", target = "productId")
+    @Mapping(source = "timestamp", target = "timestamp")
+    @Mapping(source = "total", target = "total")
+    @BeanMapping(ignoreByDefault = true)
+    @Named("clientGetCustomerViewMapping")
+    CustomerViewDto fromEntityToClientCustomerViewDto(CustomerViewProduct customerViewProduct);
+
+    @IterableMapping(elementTargetType = CustomerViewDto.class, qualifiedByName = "clientGetCustomerViewMapping")
+    List<CustomerViewDto> fromEntityListToCustomerViewDtoList(List<CustomerViewProduct> products);
 
     @Named("fromProductEntityToDtoMapper")
     @BeanMapping(ignoreByDefault = true)

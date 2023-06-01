@@ -24,12 +24,54 @@ import java.util.List;
 @Slf4j
 public class RestService {
     private String baseUrl = "https://dev-online-gateway.ghn.vn";
+    private String recommendUrl = "http://127.0.0.1:5000/";
 
     @Autowired
     ObjectMapper objectMapper;
 
     @Autowired
     RestTemplate restTemplate;
+
+    public <T> ApiMessageDto<ResponseListObj<T>> LIST(Boolean isRecommendation,String path, String authorization, final Class<T> clazz) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (authorization != null) {
+                headers.add("Authorization", authorization);
+            }
+            HttpEntity entity = new HttpEntity(headers);
+            ResolvableType resolvableType = ResolvableType.forClassWithGenerics(ResponseListObj.class,clazz);
+            ResponseEntity<ApiMessageDto<ResponseListObj<T>>> response = restTemplate.exchange((isRecommendation ? recommendUrl : baseUrl) + path, HttpMethod.GET, entity, ParameterizedTypeReference.forType(ResolvableType.forClassWithGenerics(ApiMessageDto.class, resolvableType).getType()));
+            return response.getBody();
+        } catch (Exception ex) {
+            log.error("GET>>error: " + ex.getMessage(), ex);
+            return null;
+        }
+    }
+
+
+
+    public <T> ApiMessageDto<T> GET( String path, String authorization, final Class<T> clazz){
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if(authorization!=null){
+                headers.add("Authorization", authorization);
+            }
+            HttpEntity entity = new HttpEntity(headers);
+            ParameterizedTypeReference type = new ParameterizedTypeReference<ApiMessageDto<T>>() {
+                public Type getType() {
+                    return new MyParameterizedTypeImpl((ParameterizedType) super.getType(), new Type[] {clazz});
+                }};
+            ResponseEntity<ApiMessageDto<T>> response = restTemplate.exchange(baseUrl + path, HttpMethod.GET, entity, type);
+            return response.getBody();
+        } catch (Exception ex) {
+            log.error("GET>>error: " + ex.getMessage(), ex);
+            return null;
+        }
+    }
 
     public <T, A> ApiMessageDto<T> POST(Long shopId,A input, String path, String authorization, final Class<T> clazz){
         try {

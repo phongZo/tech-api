@@ -4,6 +4,7 @@ import com.tech.api.constant.Constants;
 import com.tech.api.dto.ApiMessageDto;
 import com.tech.api.dto.ErrorCode;
 import com.tech.api.dto.ResponseListObj;
+import com.tech.api.dto.product.CustomerViewDto;
 import com.tech.api.dto.product.ProductAdminDto;
 import com.tech.api.dto.product.ProductDto;
 import com.tech.api.dto.productvariant.ProductVariantAdminDto;
@@ -14,6 +15,7 @@ import com.tech.api.form.product.UpdateProductForm;
 import com.tech.api.form.product.UpdateSellStatusForm;
 import com.tech.api.mapper.ProductMapper;
 import com.tech.api.service.CommonApiService;
+import com.tech.api.service.RestService;
 import com.tech.api.storage.criteria.ProductCriteria;
 import com.tech.api.storage.model.Customer;
 import com.tech.api.storage.model.Product;
@@ -62,6 +64,9 @@ public class ProductController extends ABasicController {
     @Autowired
     CustomerViewProductRepository customerViewProductRepository;
 
+    @Autowired
+    RestService restService;
+
     // for CMS and Store
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<ProductAdminDto>> list(@Valid ProductCriteria productCriteria, BindingResult bindingResult, Pageable pageable) {
@@ -79,6 +84,17 @@ public class ProductController extends ABasicController {
         );
     }
 
+    @GetMapping(value = "/customer-view", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<ResponseListObj<CustomerViewDto>> customerViewList() {
+        ApiMessageDto<ResponseListObj<CustomerViewDto>> responseListObjApiMessageDto = new ApiMessageDto<>();
+        ResponseListObj<CustomerViewDto> responseListObj = new ResponseListObj<>();
+        List<CustomerViewProduct> customerViewProductList = customerViewProductRepository.findAll();
+        responseListObj.setData(productMapper.fromEntityListToCustomerViewDtoList(customerViewProductList));
+
+        responseListObjApiMessageDto.setData(responseListObj);
+        responseListObjApiMessageDto.setMessage("Get list success");
+        return responseListObjApiMessageDto;
+    }
 
     // need to login customer
     @GetMapping(value = "/client-list", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -122,6 +138,33 @@ public class ProductController extends ABasicController {
         responseListObjApiMessageDto.setMessage("Get list success");
         return responseListObjApiMessageDto;
     }
+
+
+   /* // need to login customer
+    @GetMapping(value = "/client-recommend-list", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<ResponseListObj<ProductDto>> clientRecommendList(ProductCriteria productCriteria, Pageable pageable) {
+        if(!isCustomer()){
+            throw new RequestException(ErrorCode.PRODUCT_UNAUTHORIZED, "Not allowed to get recommend list.");
+        }
+        ApiMessageDto<ResponseListObj<ProductDto>> responseListObjApiMessageDto = new ApiMessageDto<>();
+        Customer customer = getCurrentCustomer();
+        CustomerViewProduct customerViewProduct = customerViewProductRepository.findBestProduct(customer.getId());
+
+        // call to get recommend
+        restService.LIST(true,"/")
+
+        productCriteria.setStatus(Constants.STATUS_ACTIVE);
+        Page<Product> productList = productRepository.findAll(productCriteria.getSpecification(), pageable);
+        ResponseListObj<ProductDto> responseListObj = new ResponseListObj<>();
+
+        responseListObj.setPage(pageable.getPageNumber());
+        responseListObj.setTotalPage(productList.getTotalPages());
+        responseListObj.setTotalElements(productList.getTotalElements());
+
+        responseListObjApiMessageDto.setData(responseListObj);
+        responseListObjApiMessageDto.setMessage("Get list success");
+        return responseListObjApiMessageDto;
+    }*/
 
 
 
@@ -269,7 +312,7 @@ public class ProductController extends ABasicController {
                 view = new CustomerViewProduct();
                 view.setCustomer(customer);
                 view.setProduct(product);
-                view.setTotal(0);
+                view.setTotal(1);
             } else {
                 view.setTotal(view.getTotal() + 1);
             }
