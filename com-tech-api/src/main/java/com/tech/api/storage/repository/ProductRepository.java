@@ -1,6 +1,8 @@
 package com.tech.api.storage.repository;
 
+import com.tech.api.dto.product.ProductDto;
 import com.tech.api.storage.model.Product;
+import com.tech.api.storage.model.ProductVariant;
 import com.tech.api.storage.projection.ProductOrdersDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
+import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     @Query("SELECT p.id as id, p.name as name,  COALESCE(SUM(CASE WHEN (o.state = 3) THEN (od.price * od.amount) ELSE 0 END), 0) as revenue,  COALESCE(SUM(CASE WHEN (o.state = 3) THEN od.amount ELSE 0 END), 0) as amount" +
@@ -27,4 +30,16 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
                                                        @Param("toDate") Date toDate,
                                                        @Param("storeId") Long storeId,
                                                        Pageable pageable);
+
+
+
+    @Query("SELECT new com.tech.api.dto.product.ProductDto(p.id, p.saleOff, p.isSaleOff, p.name, p.price, COALESCE(CAST(SUM(s.total) AS int),0), p.isSoldOut) " +
+            "FROM Product p " +
+            "LEFT JOIN ProductConfig c ON c.product = p " +
+            "LEFT JOIN ProductVariant v ON v.productConfig = c " +
+            "LEFT JOIN Stock s ON s.productVariant = v " +
+            "WHERE s.store.id = :storeId " +
+            "AND p.status = 1 " +
+            "GROUP BY p.id")
+    Page<ProductDto> findAllProductInStockOfStore(@Param("storeId") Long storeId, Pageable pageable);
 }

@@ -67,6 +67,9 @@ public class ProductController extends ABasicController {
     @Autowired
     RestService restService;
 
+    @Autowired
+    StoreRepository storeRepository;
+
     // for CMS and Store
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<ProductAdminDto>> list(@Valid ProductCriteria productCriteria, BindingResult bindingResult, Pageable pageable) {
@@ -82,6 +85,32 @@ public class ProductController extends ABasicController {
                 ),
                 "Get list product successfully"
         );
+    }
+
+    // for employee to create
+    @GetMapping(value = "/list-to-create-order", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<ResponseListObj<ProductDto>> listToCreateOrder(ProductCriteria productCriteria, BindingResult bindingResult, Pageable pageable) {
+        if(!isEmployee()){
+            throw new RequestException(ErrorCode.PRODUCT_UNAUTHORIZED, "Not allowed to get list.");
+        }
+        ApiMessageDto<ResponseListObj<ProductDto>> responseListObjApiMessageDto = new ApiMessageDto<>();
+        ResponseListObj<ProductDto> responseListObj = new ResponseListObj<>();
+        productCriteria.setStatus(Constants.STATUS_ACTIVE);
+        Employee employee = employeeRepository.findById(getCurrentUserId()).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND));
+        Store store = storeRepository.findById(employee.getStore().getId()).orElseThrow(() -> new RequestException(ErrorCode.STORE_ERROR_NOT_FOUND));
+        Page<ProductDto> productDtoList = productRepository.findAllProductInStockOfStore(store.getId(),pageable);
+        for (ProductDto dto : productDtoList.getContent()){
+            List<ProductVariantDto> variantDtos = productVariantRepository.findAllVariantInStockOfStore(store.getId(),dto.getId());
+            dto.setProductVariantDtoList(variantDtos);
+        }
+        responseListObj.setData(productDtoList.getContent());
+        responseListObj.setPage(pageable.getPageNumber());
+        responseListObj.setTotalPage(productDtoList.getTotalPages());
+        responseListObj.setTotalElements(productDtoList.getTotalElements());
+
+        responseListObjApiMessageDto.setData(responseListObj);
+        responseListObjApiMessageDto.setMessage("Get list success");
+        return responseListObjApiMessageDto;
     }
 
     @GetMapping(value = "/customer-view", produces = MediaType.APPLICATION_JSON_VALUE)
