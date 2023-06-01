@@ -1,7 +1,9 @@
 package com.tech.api.dto.product;
 
 import com.tech.api.dto.productconfig.ProductConfigDto;
+import com.tech.api.dto.productvariant.ProductVariantDto;
 import com.tech.api.dto.productvariant.VariantStockDto;
+import com.tech.api.storage.model.ProductVariant;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,5 +55,21 @@ public class ProductDto {
     @ApiModelProperty(name = "productConfigs")
     private List<ProductConfigDto> productConfigs;
 
+    @ApiModelProperty(name = "productVariantDtoList")
+    private List<ProductVariantDto> productVariantDtoList;
+
     private List<VariantStockDto> stockDtoList;
+
+    public ProductDto(Long id, Integer saleOff, Boolean isSaleOff, String name, BigDecimal price, Integer totalInStock, Boolean isSoldOut) {
+        this.id = id;
+        this.saleOff = saleOff;
+        this.isSaleOff = isSaleOff;
+        this.name = name;
+        this.price = price;
+        this.totalInStock = totalInStock;
+        this.isSoldOut = isSoldOut;
+    }
+
+    public ProductDto() {
+    }
 }

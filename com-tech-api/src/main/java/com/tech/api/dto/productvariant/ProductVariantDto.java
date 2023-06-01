@@ -31,4 +31,14 @@ public class ProductVariantDto {
 
     private Integer status;
     private Integer totalInStock;
+
+    public ProductVariantDto(Long id, String name, Double price, Integer totalInStock) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.totalInStock = totalInStock;
+    }
+
+    public ProductVariantDto() {
+    }
 }
