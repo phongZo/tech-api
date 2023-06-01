@@ -60,7 +60,7 @@ public class ProductDto {
 
     private List<VariantStockDto> stockDtoList;
 
-    public ProductDto(Long id, Integer saleOff, Boolean isSaleOff, String name, BigDecimal price, Integer totalInStock, Boolean isSoldOut) {
+    public ProductDto(Long id, Integer saleOff, Boolean isSaleOff, String name, BigDecimal price, Integer totalInStock, Boolean isSoldOut, String image) {
         this.id = id;
         this.saleOff = saleOff;
         this.isSaleOff = isSaleOff;
@@ -68,6 +68,7 @@ public class ProductDto {
         this.price = price;
         this.totalInStock = totalInStock;
         this.isSoldOut = isSoldOut;
+        this.image = image
     }
 
     public ProductDto() {
