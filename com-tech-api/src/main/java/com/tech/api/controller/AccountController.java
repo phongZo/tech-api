@@ -177,7 +177,7 @@ public class AccountController extends ABasicController{
                 appendStringRole += ",/orders/archive";
             }
         } else if(Objects.equals(account.getKind(), Constants.USER_KIND_CUSTOMER)) {
-            appendStringRole = "/customer/profile,/customer/update-profile,/account/logout";
+            appendStringRole = "/product/client-recommend-list,/customer/profile,/customer/update-profile,/account/logout";
         } else if(Objects.equals(account.getKind(), Constants.USER_KIND_EMPLOYEE)) {
             appendStringRole = "/product/list-to-create-order,/employee/profile,/employee/update-profile,/account/logout";
         } else if(Objects.equals(account.getKind(), Constants.USER_KIND_STORE_MANAGER)) {
