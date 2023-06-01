@@ -68,7 +68,7 @@ public class ProductDto {
         this.price = price;
         this.totalInStock = totalInStock;
         this.isSoldOut = isSoldOut;
-        this.image = image
+        this.image = image;
     }
 
     public ProductDto() {
