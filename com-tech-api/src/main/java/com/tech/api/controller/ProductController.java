@@ -7,12 +7,9 @@ import com.tech.api.dto.ResponseListObj;
 import com.tech.api.dto.product.CustomerViewDto;
 import com.tech.api.dto.product.ProductAdminDto;
 import com.tech.api.dto.product.ProductDto;
-import com.tech.api.dto.productvariant.ProductVariantAdminDto;
 import com.tech.api.dto.productvariant.ProductVariantDto;
-import com.tech.api.dto.productvariant.VariantStockDto;
 import com.tech.api.form.product.UpdateFavoriteForm;
 import com.tech.api.form.product.UpdateProductForm;
-import com.tech.api.form.product.UpdateSellStatusForm;
 import com.tech.api.mapper.ProductMapper;
 import com.tech.api.service.CommonApiService;
 import com.tech.api.service.RestService;
@@ -169,7 +166,7 @@ public class ProductController extends ABasicController {
     }
 
 
-   /* // need to login customer
+    // need to login customer
     @GetMapping(value = "/client-recommend-list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListObj<ProductDto>> clientRecommendList(ProductCriteria productCriteria, Pageable pageable) {
         if(!isCustomer()){
@@ -180,12 +177,22 @@ public class ProductController extends ABasicController {
         CustomerViewProduct customerViewProduct = customerViewProductRepository.findBestProduct(customer.getId());
 
         // call to get recommend
-        restService.LIST(true,"/")
-
-        productCriteria.setStatus(Constants.STATUS_ACTIVE);
-        Page<Product> productList = productRepository.findAll(productCriteria.getSpecification(), pageable);
+        Page<Product> productList;
+        ApiMessageDto<String> apiMessageDto = restService.GET(true,"/recommend/" + customerViewProduct.getProduct().getId(),null,String.class);
+        if(apiMessageDto != null && apiMessageDto.getData() != null){
+            List<Long> productListId = new ArrayList<>();
+            String[] productIdList = apiMessageDto.getData().split(",");
+            for (String s : productIdList) {
+                productListId.add(Long.valueOf(s));
+            }
+            productList = productRepository.findAllByListId(productListId,pageable);
+        }
+        else{
+            productCriteria.setStatus(Constants.STATUS_ACTIVE);
+            productList = productRepository.findAll(productCriteria.getSpecification(), pageable);
+        }
         ResponseListObj<ProductDto> responseListObj = new ResponseListObj<>();
-
+        responseListObj.setData(productMapper.fromEntityListToProductClientDtoList(productList.getContent()));
         responseListObj.setPage(pageable.getPageNumber());
         responseListObj.setTotalPage(productList.getTotalPages());
         responseListObj.setTotalElements(productList.getTotalElements());
@@ -193,7 +200,7 @@ public class ProductController extends ABasicController {
         responseListObjApiMessageDto.setData(responseListObj);
         responseListObjApiMessageDto.setMessage("Get list success");
         return responseListObjApiMessageDto;
-    }*/
+    }
 
 
 
