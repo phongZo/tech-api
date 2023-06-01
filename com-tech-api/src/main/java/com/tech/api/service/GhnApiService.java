@@ -20,7 +20,7 @@ public class GhnApiService {
         form.setFromDistrictId(fromDistrictId);
         form.setToDistrictId(toDistrictId);
 
-        String path = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/available-services";
+        String path = "/shiip/public-api/v2/shipping-order/available-services";
         ApiMessageDto<List<DeliveryServiceResponse>> result = restService.POST_FOR_LIST(null,form,path,null,DeliveryServiceResponse.class);
         DeliveryServiceResponse item = result.getData().get(0);
         if(item != null){
@@ -42,7 +42,7 @@ public class GhnApiService {
         form.setServiceType(serviceTypeId);
         form.setToWardCode(toWardCode);
 
-        String path = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee";
+        String path = "/shiip/public-api/v2/shipping-order/fee";
         ApiMessageDto<DeliveryServiceResponse> result = restService.POST(null,form,path,null,DeliveryServiceResponse.class);
         return result.getData();
     }
@@ -56,7 +56,7 @@ public class GhnApiService {
         form.setToWardCode(toWardCode);
         form.setFromWardCode(fromWardCode);
 
-        String path = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime";
+        String path = "/shiip/public-api/v2/shipping-order/leadtime";
         ApiMessageDto<DeliveryServiceResponse> result = restService.POST(null,form,path,null,DeliveryServiceResponse.class);
         return result.getData();
     }
