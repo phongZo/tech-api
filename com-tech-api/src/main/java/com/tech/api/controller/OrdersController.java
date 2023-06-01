@@ -161,6 +161,8 @@ public class OrdersController extends ABasicController{
         }
         Long checkAccountId = getCurrentUserId();
         Employee checkEmployee = employeeRepository.findById(checkAccountId).orElseThrow(() -> new RequestException(ErrorCode.EMPLOYEE_ERROR_NOT_FOUND));
+        Store store = storeRepository.findById(checkEmployee.getStore().getId()).orElseThrow(() -> new RequestException(ErrorCode.STORE_ERROR_NOT_FOUND));
+        orders.setStore(store);
         orders.setState(Constants.ORDERS_STATE_CREATED);
         if(orders.getState().equals(Constants.ORDERS_STATE_PAID)) orders.setIsPaid(true);
         if(!orders.getIsDelivery()) orders.setState(Constants.ORDERS_STATE_COMPLETED);
@@ -224,16 +226,17 @@ public class OrdersController extends ABasicController{
                 if(check != null){
                     check.setReceiverFullName(createOrdersForm.getReceiverName());
                     check.setPhone(createOrdersForm.getCustomerPhone());
-                    customerAddressRepository.save(check);
+                    check = customerAddressRepository.save(check);
+                    orders.setAddress(check);
                 } else{
-                    creatNewAddressForCustomer(customerCheck,createOrdersForm,point);
+                     orders.setAddress(creatNewAddressForCustomer(customerCheck,createOrdersForm,point));
                 }
 
             }
         }
     }
 
-    private void creatNewAddressForCustomer(Customer check, CreateOrdersForm createOrdersForm, Point point) {
+    private CustomerAddress creatNewAddressForCustomer(Customer check, CreateOrdersForm createOrdersForm, Point point) {
         CustomerAddress address = new CustomerAddress();
         address.setCustomer(check);
         address.setAddressDetails(createOrdersForm.getAddress());
@@ -246,6 +249,7 @@ public class OrdersController extends ABasicController{
         address.setLatitude(point.latitude());
         address.setLongitude(point.longitude());
         customerAddressRepository.save(address);
+        return address;
     }
 
     // Store
@@ -903,6 +907,18 @@ public class OrdersController extends ABasicController{
             item.setPrice(ordersDetail.getPrice().intValue());
             item.setQuantity(ordersDetail.getAmount());
             listItem.add(item);
+
+            // update stock of store
+            Stock stock = stockRepository.findFirstByProductVariantIdAndStoreId(variant.getId(),orders.getStore().getId());
+            if(stock != null){
+                if(stock.getTotal() >= ordersDetail.getAmount()){
+                    stock.setTotal(stock.getTotal() - ordersDetail.getAmount());
+                    stockRepository.save(stock);
+                }
+            }
+            if(productCheck.getTotalInStock() < ordersDetail.getAmount()) continue;
+            productCheck.setTotalInStock(productCheck.getTotalInStock() - ordersDetail.getAmount());
+            productRepository.save(productCheck);
         }
         orders.setTempPrice(amountPrice);
         orders.setAmount(amount);
