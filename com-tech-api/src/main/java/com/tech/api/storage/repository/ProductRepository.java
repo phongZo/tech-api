@@ -33,7 +33,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
 
 
-    @Query("SELECT new com.tech.api.dto.product.ProductDto(p.id, p.saleOff, p.isSaleOff, p.name, p.price, COALESCE(CAST(SUM(s.total) AS int),0), p.isSoldOut) " +
+    @Query("SELECT new com.tech.api.dto.product.ProductDto(p.id, p.saleOff, p.isSaleOff, p.name, p.price, COALESCE(CAST(SUM(s.total) AS int),0), p.isSoldOut, p.image) " +
             "FROM Product p " +
             "LEFT JOIN ProductConfig c ON c.product = p " +
             "LEFT JOIN ProductVariant v ON v.productConfig = c " +
@@ -42,4 +42,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             "AND p.status = 1 " +
             "GROUP BY p.id")
     Page<ProductDto> findAllProductInStockOfStore(@Param("storeId") Long storeId, Pageable pageable);
+
+    @Query("SELECT p " +
+            "FROM Product p " +
+            "WHERE p.id in :list")
+    Page<Product> findAllByListId(@Param("list") List<Long> list, Pageable pageable);
 }
