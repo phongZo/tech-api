@@ -23,6 +23,7 @@ public interface ProductVariantMapper {
     @Mapping(source = "image", target = "image")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "status", target = "status")
+    @Mapping(source = "isCopied", target = "isCopied")
     @Mapping(source = "color", target = "color")
     ProductVariant fromCreateProductVariantFormToEntity(CreateProductVariantForm createProductVariantForm);
 
@@ -40,6 +41,7 @@ public interface ProductVariantMapper {
     @Mapping(source = "status", target = "status")
     @Mapping(source = "totalInStock", target = "totalInStock")
     @Mapping(source = "description", target = "description")
+    @Mapping(source = "isCopied", target = "isCopied")
     ProductVariantDto fromProductVariantEntityToDto(ProductVariant productVariant);
 
     @Named("fromProductVariantEntityListToDtoListMapper")

@@ -23,6 +23,8 @@ public class ProductVariant extends Auditable<String> {
     @Column(name = "color")
     private String color;
 
+    private boolean isCopied = false;
+
     @Column(name = "description")
     private String description;
 

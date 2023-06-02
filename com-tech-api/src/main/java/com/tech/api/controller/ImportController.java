@@ -166,6 +166,7 @@ public class ImportController extends ABasicController{
             Product product = productRepository.findById(item.getVariant().getProductConfig().getProduct().getId()).orElse(null);
             if(product != null) {
                 product.setTotalInStock(product.getTotalInStock() + item.getQuantity());
+                product.setIsSoldOut(false);
                 productRepository.save(product);
             }
         }
