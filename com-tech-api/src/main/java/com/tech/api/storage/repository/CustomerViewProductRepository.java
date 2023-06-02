@@ -11,6 +11,7 @@ public interface CustomerViewProductRepository extends JpaRepository<CustomerVie
     CustomerViewProduct findFirstByCustomerIdAndProductId(Long customerId, Long productId);
 
     @Query("SELECT c FROM CustomerViewProduct c WHERE c.customer.id = :customerId " +
-            "AND c.total = (SELECT MAX(c2.total) FROM CustomerViewProduct c2 WHERE c2.customer.id = :customerId)")
+            "AND c.total = (SELECT MAX(c2.total) FROM CustomerViewProduct c2 WHERE c2.customer.id = :customerId) " +
+            "ORDER BY c.timestamp DESC")
     List<CustomerViewProduct> findBestProduct(@Param("customerId") Long customerId);
 }
