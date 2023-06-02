@@ -82,7 +82,9 @@ public class CartController extends ABasicController{
                     }
                     totalMoney += variant.getPrice() * (1 - saleOffValue);
                 }
-                totalMoney += variant.getPrice();
+                else{
+                    totalMoney += variant.getPrice();
+                }
             }
             dto.setTotalMoney(totalMoney);
         }
