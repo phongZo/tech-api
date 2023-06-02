@@ -30,7 +30,7 @@ public class CreateProductVariantForm {
     @ApiModelProperty(name = "status")
     private Integer status = 1;
 
-    private boolean isCopied = false;
+    private Boolean isCopied = false;
 
     private String color;
 }
