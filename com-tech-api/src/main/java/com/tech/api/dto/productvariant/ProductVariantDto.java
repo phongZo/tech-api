@@ -29,7 +29,7 @@ public class ProductVariantDto {
 
     private String color;
 
-    private boolean isCopied = false;
+    private Boolean isCopied = false;
 
     private Integer status;
     private Integer totalInStock;
