@@ -178,14 +178,20 @@ public class ProductController extends ABasicController {
 
         // call to get recommend
         Page<Product> productList;
-        ApiMessageDto<String> apiMessageDto = restService.GET(true,"/recommend/" + customerViewProduct.getProduct().getId(),null,String.class);
-        if(apiMessageDto != null && apiMessageDto.getData() != null){
-            List<Long> productListId = new ArrayList<>();
-            String[] productIdList = apiMessageDto.getData().split(",");
-            for (String s : productIdList) {
-                productListId.add(Long.valueOf(s));
+        if(customerViewProduct != null){
+            ApiMessageDto<String> apiMessageDto = restService.GET(true,"/recommend/" + customerViewProduct.getProduct().getId(),null,String.class);
+            if(apiMessageDto != null && apiMessageDto.getData() != null){
+                List<Long> productListId = new ArrayList<>();
+                String[] productIdList = apiMessageDto.getData().split(",");
+                for (String s : productIdList) {
+                    productListId.add(Long.valueOf(s));
+                }
+                productList = productRepository.findAllByListId(productListId,pageable);
             }
-            productList = productRepository.findAllByListId(productListId,pageable);
+            else{
+                productCriteria.setStatus(Constants.STATUS_ACTIVE);
+                productList = productRepository.findAll(productCriteria.getSpecification(), pageable);
+            }
         }
         else{
             productCriteria.setStatus(Constants.STATUS_ACTIVE);
