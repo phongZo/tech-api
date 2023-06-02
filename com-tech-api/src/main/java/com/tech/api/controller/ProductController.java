@@ -174,12 +174,12 @@ public class ProductController extends ABasicController {
         }
         ApiMessageDto<ResponseListObj<ProductDto>> responseListObjApiMessageDto = new ApiMessageDto<>();
         Customer customer = getCurrentCustomer();
-        CustomerViewProduct customerViewProduct = customerViewProductRepository.findBestProduct(customer.getId());
+        List<CustomerViewProduct> customerViewProduct = customerViewProductRepository.findBestProduct(customer.getId());
 
         // call to get recommend
         Page<Product> productList;
-        if(customerViewProduct != null){
-            ApiMessageDto<String> apiMessageDto = restService.GET(true,"/recommend/" + customerViewProduct.getProduct().getId(),null,String.class);
+        if(customerViewProduct != null && !customerViewProduct.isEmpty()){
+            ApiMessageDto<String> apiMessageDto = restService.GET(true,"/recommend/" + customerViewProduct.get(0).getProduct().getId(),null,String.class);
             if(apiMessageDto != null && apiMessageDto.getData() != null){
                 List<Long> productListId = new ArrayList<>();
                 String[] productIdList = apiMessageDto.getData().split(",");
