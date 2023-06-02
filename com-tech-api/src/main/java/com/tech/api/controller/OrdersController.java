@@ -641,7 +641,8 @@ public class OrdersController extends ABasicController{
         form.setHeight(10);
         form.setLength(1);
         form.setWidth(20);
-        form.setInsuranceValue(orders.getTotalMoney().intValue() > Constants.INSURANCE_FEE ? Constants.INSURANCE_FEE : orders.getTotalMoney().intValue());
+        form.setInsuranceValue(5000000);
+        //form.setInsuranceValue(orders.getTotalMoney().intValue() > Constants.INSURANCE_FEE ? Constants.INSURANCE_FEE : orders.getTotalMoney().intValue());
         form.setServiceId(serviceId);
         form.setServiceTypeId(serviceType);
         form.setItems(itemList);
