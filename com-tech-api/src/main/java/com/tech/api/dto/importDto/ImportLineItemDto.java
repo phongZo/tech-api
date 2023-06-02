@@ -8,4 +8,5 @@ public class ImportLineItemDto {
     private Long id;
     private ProductVariantDto variantDto;
     private Integer quantity;
+    private String productName;
 }

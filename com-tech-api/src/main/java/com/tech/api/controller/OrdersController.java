@@ -919,6 +919,7 @@ public class OrdersController extends ABasicController{
             }
             if(productCheck.getTotalInStock() < ordersDetail.getAmount()) continue;
             productCheck.setTotalInStock(productCheck.getTotalInStock() - ordersDetail.getAmount());
+            if(productCheck.getTotalInStock() == 0) productCheck.setIsSoldOut(true);
             productRepository.save(productCheck);
         }
         orders.setTempPrice(amountPrice);

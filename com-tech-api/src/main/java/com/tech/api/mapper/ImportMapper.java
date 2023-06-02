@@ -17,6 +17,7 @@ import java.util.List;
 public interface ImportMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "variant", target = "variantDto")
+    @Mapping(source = "variant.productConfig.product.name", target = "productName")
     @Mapping(source = "quantity", target = "quantity", qualifiedByName = "fromProductVariantEntityToDto")
     @BeanMapping(ignoreByDefault = true)
     @Named("fromEntityToImportLineItemDto")
