@@ -499,6 +499,7 @@ public class OrdersController extends ABasicController{
             if (productCheck == null){
                 throw new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "product is not existed");
             }
+            ordersDetail.setProductVariant(variant);
             if(variant.getTotalInStock() < ordersDetail.getAmount()){
                 listNotInStock.add(ordersDetail);
             }
