@@ -150,7 +150,7 @@ public class ImportController extends ABasicController{
         for (ImportLineItem item : lineItemList){
             ProductVariant variant = productVariantRepository.findById(item.getVariant().getId()).orElse(null);
             if (variant == null) continue;
-            variant.setTotalInStock(item.getQuantity());
+            variant.setTotalInStock(variant.getTotalInStock() + item.getQuantity());
             productVariantRepository.save(variant);
             Stock stock = stockRepository.findFirstByProductVariantIdAndStoreId(item.getVariant().getId(),employee.getStore().getId());
             if(stock == null){
