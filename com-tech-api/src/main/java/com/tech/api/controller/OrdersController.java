@@ -481,6 +481,35 @@ public class OrdersController extends ABasicController{
                 .toLocalDate();
     }
 
+    @PostMapping(value = "/check-valid-items", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<CheckValidOrderItemsDto> checkValidItems(@Valid @RequestBody CreateOrdersClientForm createOrdersForm) {
+        if(!isCustomer()){
+            throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED, "Not allowed to create.");
+        }
+        ApiMessageDto<CheckValidOrderItemsDto> apiMessageDto = new ApiMessageDto<>();
+        List<OrdersDetail> ordersDetailList = ordersDetailMapper
+                .fromCreateOrdersDetailFormListToOrdersDetailList(createOrdersForm.getCreateOrdersDetailFormList());
+        List<OrdersDetail> listNotInStock = new ArrayList<>();
+        for (OrdersDetail ordersDetail : ordersDetailList){
+            ProductVariant variant = productVariantRepository.findById(ordersDetail.getProductVariant().getId()).orElse(null);
+            if(variant == null){
+                throw new RequestException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND, "product variant not existed");
+            }
+            Product productCheck = productRepository.findById(variant.getProductConfig().getProduct().getId()).orElse(null);
+            if (productCheck == null){
+                throw new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "product is not existed");
+            }
+            if(variant.getTotalInStock() < ordersDetail.getAmount()){
+                listNotInStock.add(ordersDetail);
+            }
+        }
+        CheckValidOrderItemsDto dto = new CheckValidOrderItemsDto();
+        dto.setOrdersDetailDtoList(ordersDetailMapper.fromEntityListToOrdersDetailClientDtoList(listNotInStock));
+        apiMessageDto.setData(dto);
+        apiMessageDto.setMessage("Check valid success");
+        return apiMessageDto;
+    }
+
     @PostMapping(value = "/client-create", produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public ApiMessageDto<String> clientCreate(@Valid @RequestBody CreateOrdersClientForm createOrdersForm, BindingResult bindingResult) {
