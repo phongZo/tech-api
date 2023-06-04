@@ -33,7 +33,7 @@ public class OrdersCriteria {
             @Override
             public Predicate toPredicate(Root<Orders> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
                 List<Predicate> predicates = new ArrayList<>();
-
+                query.orderBy(cb.desc(root.get("createdDate")));
                 if(getId() != null){
                     predicates.add(cb.equal(root.get("id"), getId()));
                 }
