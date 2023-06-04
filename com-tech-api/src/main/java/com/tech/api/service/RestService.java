@@ -109,5 +109,49 @@ public class RestService {
             return null;
         }
     }
+
+    public <T, A> ApiMessageDto<T> PUT(A input, String path, String authorization, final Class<T> clazz){
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("token", Constants.token);
+            if(authorization!=null){
+                headers.add("Authorization", authorization);
+            }
+            HttpEntity<A> entity = new HttpEntity<>(input, headers);
+            ParameterizedTypeReference type = new ParameterizedTypeReference<ApiMessageDto<T>>() {
+                public Type getType() {
+                    return new MyParameterizedTypeImpl((ParameterizedType) super.getType(), new Type[] {clazz});
+                }};
+            ResponseEntity<ApiMessageDto<T>> response = restTemplate.exchange(baseUrl+path, HttpMethod.PUT, entity,type);
+            return response.getBody();
+        } catch (Exception ex) {
+            log.error("PUT>>error: " + ex.getMessage(), ex);
+            return null;
+        }
+    }
+
+    public <T> ApiMessageDto<T> DELETE( String path, String authorization, final Class<T> clazz){
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if(authorization!=null){
+                headers.add("Authorization", authorization);
+            }
+            HttpEntity entity = new HttpEntity(headers);
+            ParameterizedTypeReference type = new ParameterizedTypeReference<ApiMessageDto<T>>() {
+                public Type getType() {
+                    return new MyParameterizedTypeImpl((ParameterizedType) super.getType(), new Type[] {clazz});
+                }};
+            ResponseEntity<ApiMessageDto<T>> response = restTemplate.exchange(baseUrl+path, HttpMethod.DELETE, entity,type);
+            return response.getBody();
+        } catch (Exception ex) {
+            log.error("DELETE>>error: " + ex.getMessage(), ex);
+            return null;
+        }
+    }
+
 }
 

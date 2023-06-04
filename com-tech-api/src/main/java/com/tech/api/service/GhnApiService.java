@@ -6,6 +6,7 @@ import com.tech.api.dto.ApiMessageDto;
 import com.tech.api.dto.ghn.DeliveryServiceResponse;
 import com.tech.api.form.orders.GetDeliveryFeeForm;
 import com.tech.api.form.orders.GetDeliveryServiceForm;
+import com.tech.api.form.orders.UpdatePickShiftGhnForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,5 +60,10 @@ public class GhnApiService {
         String path = "/shiip/public-api/v2/shipping-order/leadtime";
         ApiMessageDto<DeliveryServiceResponse> result = restService.POST(null,form,path,null,DeliveryServiceResponse.class);
         return result.getData();
+    }
+
+    public void updatePickingShiftOrder(UpdatePickShiftGhnForm form){
+        String path = "/shiip/public-api/v2/shipping-order/update";
+        ApiMessageDto<String> result = restService.PUT(form,path,null,String.class);
     }
 }

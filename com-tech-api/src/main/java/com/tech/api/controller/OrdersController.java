@@ -554,16 +554,7 @@ public class OrdersController extends ABasicController{
 
         // check wallet money if not have enough money
         if(createOrdersForm.getPaymentMethod().equals(Constants.PAYMENT_METHOD_ONLINE)){
-            /*Customer customer = getCurrentCustomer();
-            if(customer.getWalletMoney() < orders.getTotalMoney()){
-                ordersRepository.delete(savedOrder);
-                apiMessageDto.setResult(false);
-                apiMessageDto.setMessage("Ví không đủ tiền");
-                return apiMessageDto;
-            } else {
-                customer.setWalletMoney(customer.getWalletMoney() - orders.getTotalMoney());
-                customerRepository.save(customer);
-            }*/
+            orders.setState(Constants.ORDERS_STATE_WAIT_FOR_PAYMENT);
         }
         ordersDetailRepository.saveAll(ordersDetailList);
 
@@ -670,6 +661,11 @@ public class OrdersController extends ABasicController{
         form.setWeight(200);
         form.setHeight(10);
         form.setLength(1);
+        if(!orders.getState().equals(Constants.ORDERS_STATE_WAIT_FOR_PAYMENT)){
+            List<Integer> pickingShift = new ArrayList<>();
+            pickingShift.add(2);
+            form.setPickingShift(pickingShift);
+        }
         form.setWidth(20);
         form.setInsuranceValue(5000000);
         //form.setInsuranceValue(orders.getTotalMoney().intValue() > Constants.INSURANCE_FEE ? Constants.INSURANCE_FEE : orders.getTotalMoney().intValue());
@@ -854,6 +850,19 @@ public class OrdersController extends ABasicController{
         Integer prevState = orders.getState();
         orders.setState(updateStateOrdersForm.getState());
         orders.setPrevState(prevState);
+        if(orders.getPrevState().equals(Constants.ORDERS_STATE_WAIT_FOR_PAYMENT) && orders.getState().equals(Constants.ORDERS_STATE_CREATED)){
+            orders.setIsPaid(true);
+            ordersRepository.save(orders);
+
+            // send api to update order GHN
+            List<Integer> pickingShift = new ArrayList<>();
+            pickingShift.add(2);
+
+            UpdatePickShiftGhnForm form = new UpdatePickShiftGhnForm();
+            form.setOrderCode(orders.getCode());
+            form.setPickingShift(pickingShift);
+            ghnApiService.updatePickingShiftOrder(form);
+        }
 
         // UPDATE SOLD AMOUNT OF PRODUCT
         if(orders.getState().equals(Constants.ORDERS_STATE_COMPLETED)){
@@ -987,7 +996,9 @@ public class OrdersController extends ABasicController{
     private void checkNewState(UpdateStateOrdersForm updateStateOrdersForm,Orders orders) {
         // state mới phải lớn hơn state cũ
         if((updateStateOrdersForm.getState() <= orders.getState())){
-            throw new RequestException(ErrorCode.ORDERS_ERROR_BAD_REQUEST, "Update orders state must mor than or equal old state");
+            if(!(orders.getState().equals(Constants.ORDERS_STATE_WAIT_FOR_PAYMENT) && updateStateOrdersForm.getState().equals(Constants.ORDERS_STATE_CREATED))){
+                throw new RequestException(ErrorCode.ORDERS_ERROR_BAD_REQUEST, "Update orders state must mor than or equal old state");
+            }
         }
         // State 3 4 không thể update
         Integer state = orders.getState();
