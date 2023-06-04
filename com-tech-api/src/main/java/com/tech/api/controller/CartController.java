@@ -80,10 +80,10 @@ public class CartController extends ABasicController{
                     if(product.getSaleOff() != null){
                         saleOffValue = (float)product.getSaleOff() / 100;
                     }
-                    totalMoney += variant.getPrice() * (1 - saleOffValue);
+                    totalMoney += lineItem.getQuantity() * (variant.getPrice() * (1 - saleOffValue));
                 }
                 else{
-                    totalMoney += variant.getPrice();
+                    totalMoney += lineItem.getQuantity() * variant.getPrice();
                 }
             }
             dto.setTotalMoney(totalMoney);
