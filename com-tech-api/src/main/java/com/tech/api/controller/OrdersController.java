@@ -128,7 +128,7 @@ public class OrdersController extends ABasicController{
         }
         ordersCriteria.setIsSaved(true);
         ApiMessageDto<ResponseListObj<OrdersDto>> responseListObjApiMessageDto = new ApiMessageDto<>();
-        Page<Orders> listOrders = ordersRepository.findAll(ordersCriteria.getSpecification(), pageable);
+        Page<Orders> listOrders = ordersRepository.findAll(ordersCriteria.getSpecification(), Pageable.unpaged());
         ResponseListObj<OrdersDto> responseListObj = new ResponseListObj<>();
         responseListObj.setData(ordersMapper.fromEntityListToOrdersDtoList(listOrders.getContent()));
         responseListObj.setPage(pageable.getPageNumber());
