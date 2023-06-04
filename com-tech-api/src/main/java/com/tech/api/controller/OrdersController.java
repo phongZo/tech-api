@@ -877,7 +877,7 @@ public class OrdersController extends ABasicController{
                 productRepository.save(productCheck);
             }
             // update loyalty point and point
-            Customer customer = customerRepository.findCustomerByAccountId(orders.getCustomer().getId());
+            Customer customer = customerRepository.findById(orders.getCustomer().getId()).orElse(null);
             if(customer != null){
                 int orderPoint = (int) (orders.getTotalMoney() / 1000);
                 // up level
