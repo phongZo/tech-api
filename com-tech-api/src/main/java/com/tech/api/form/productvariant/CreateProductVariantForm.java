@@ -26,6 +26,8 @@ public class CreateProductVariantForm {
     @ApiModelProperty(name = "description")
     private String description;
 
+    private Integer totalInStock = 0;
+
     @Status
     @ApiModelProperty(name = "status")
     private Integer status = 1;
