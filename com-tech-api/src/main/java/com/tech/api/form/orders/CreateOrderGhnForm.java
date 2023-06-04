@@ -34,6 +34,9 @@ public class CreateOrderGhnForm {
     @JsonProperty("cod_amount")
     private Integer codAmount;
 
+    @JsonProperty("pick_shift")
+    private List<Integer> pickingShift;
+
     @JsonProperty("weight")
     private Integer weight;
 
