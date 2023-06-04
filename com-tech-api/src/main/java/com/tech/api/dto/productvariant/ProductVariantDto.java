@@ -27,6 +27,7 @@ public class ProductVariantDto {
 
     private List<VariantStockDto> variantStockDtoList;
 
+    @ApiModelProperty(name = "color")
     private String color;
 
     private Boolean isCopied = false;
