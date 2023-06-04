@@ -197,8 +197,23 @@ public class ProductController extends ABasicController {
             productCriteria.setStatus(Constants.STATUS_ACTIVE);
             productList = productRepository.findAll(productCriteria.getSpecification(), pageable);
         }
+
+        List<ProductDto> dto = new ArrayList<>();
+        for (Product product : productList){
+            ProductDto productDto = productMapper.fromEntityToClientDto(product);
+            if(product.getCustomersLiked().stream()
+                    .anyMatch(customer2 -> customer2.getId().equals(customer.getId()))){
+                productDto.setIsLike(true);
+                dto.add(productDto);
+                continue;
+            }
+            if(productCriteria.getIsLike() != null && productCriteria.getIsLike()){
+                continue;
+            }
+            dto.add(productDto);
+        }
         ResponseListObj<ProductDto> responseListObj = new ResponseListObj<>();
-        responseListObj.setData(productMapper.fromEntityListToProductClientDtoList(productList.getContent()));
+        responseListObj.setData(dto);
         responseListObj.setPage(pageable.getPageNumber());
         responseListObj.setTotalPage(productList.getTotalPages());
         responseListObj.setTotalElements(productList.getTotalElements());
