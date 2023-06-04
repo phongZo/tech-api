@@ -20,4 +20,6 @@ public class ProductVariantAdminDto extends ABasicAdminDto {
 
     @ApiModelProperty(name = "image")
     private String image;
+
+    private String color;
 }
