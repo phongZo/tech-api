@@ -24,6 +24,7 @@ public interface ProductVariantMapper {
     @Mapping(source = "description", target = "description")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "isCopied", target = "isCopied")
+    @Mapping(source = "totalInStock", target = "totalInStock")
     @Mapping(source = "color", target = "color")
     ProductVariant fromCreateProductVariantFormToEntity(CreateProductVariantForm createProductVariantForm);
 
@@ -67,6 +68,7 @@ public interface ProductVariantMapper {
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
+    @Mapping(source = "color", target = "color")
     @Mapping(source = "description", target = "description")
     ProductVariantAdminDto fromProductVariantEntityToAdminDto(ProductVariant productVariant);
 
