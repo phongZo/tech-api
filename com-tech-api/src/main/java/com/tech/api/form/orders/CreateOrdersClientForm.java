@@ -3,6 +3,7 @@ package com.tech.api.form.orders;
 import com.tech.api.validation.PaymentMethod;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -32,6 +33,7 @@ public class CreateOrdersClientForm {
     @ApiModelProperty(required = true)
     private Double deliveryFee = 0d;
 
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate expectedTimeDelivery;
 
     @NotEmpty(message = "createOrdersDetailFormList cannot be empty")
