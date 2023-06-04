@@ -104,6 +104,7 @@ public interface ProductMapper {
     @Mapping(source = "price", target = "price")
     @Mapping(source = "image", target = "image")
     @Mapping(source = "saleOff", target = "saleOff")
+    @Mapping(source = "totalReview", target = "totalReview")
     @Mapping(source = "totalInStock", target = "totalInStock")
     @Mapping(source = "isSoldOut", target = "isSoldOut")
     @Mapping(source = "parentProduct.id", target = "parentProductId")
