@@ -919,7 +919,7 @@ public class OrdersController extends ABasicController{
     private List<GhnOrderItem> amountPriceCal(Double deliveryFee,Orders orders,List<OrdersDetail> ordersDetailList, Orders savedOrder, CustomerPromotion promotion) {
         List<GhnOrderItem> listItem = new ArrayList<>();
         int checkIndex = 0;
-        double amountPrice = 0.0;
+        double amountPrice = 0;
         // calculate amount item
         Integer amount = 0;
         for (OrdersDetail ordersDetail : ordersDetailList){
@@ -963,7 +963,7 @@ public class OrdersController extends ABasicController{
         }
         orders.setTempPrice(amountPrice);
         orders.setAmount(amount);
-        Double totalMoney = 0d;
+        double totalMoney = 0d;
         if(deliveryFee != null) amountPrice += deliveryFee;
         totalMoney = totalMoneyHaveToPay(amountPrice,orders,promotion);
         orders.setSaleOffMoney(amountPrice - totalMoney);
@@ -990,7 +990,7 @@ public class OrdersController extends ABasicController{
             }
             amountPrice -= amountPrice - amountPrice * ((double)percent / 100);
         }
-        return Math.round(amountPrice * 100.0) / 100.0;          // Làm tròn đến thập phân thứ 2
+        return amountPrice;
     }
 
     private void checkNewState(UpdateStateOrdersForm updateStateOrdersForm,Orders orders) {
