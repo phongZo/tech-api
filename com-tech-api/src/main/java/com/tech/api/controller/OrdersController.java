@@ -963,10 +963,10 @@ public class OrdersController extends ABasicController{
         }
         orders.setTempPrice(amountPrice);
         orders.setAmount(amount);
-        double totalMoney = 0d;
+        double totalMoney = 0;
         if(deliveryFee != null) amountPrice += deliveryFee;
         totalMoney = totalMoneyHaveToPay(amountPrice,orders,promotion);
-        orders.setSaleOffMoney(amountPrice - totalMoney);
+        //orders.setSaleOffMoney(amountPrice - totalMoney);
         orders.setTotalMoney(totalMoney);
         return listItem;
     }
@@ -979,9 +979,11 @@ public class OrdersController extends ABasicController{
         if(kind.equals(Constants.PROMOTION_KIND_MONEY)){
             double saleOff = Double.parseDouble(promotion.getPromotion().getValue());
             amountPrice -= saleOff;
+            orders.setSaleOffMoney(saleOff);
         } else if (kind.equals(Constants.PROMOTION_KIND_PERCENT)){
             int percent = Integer.parseInt(promotion.getPromotion().getValue());
             double valueAfterSale = amountPrice * ((double)percent / 100);
+            orders.setSaleOffMoney(valueAfterSale);
             if(promotion.getPromotion().getMaxValueForPercent() != null){
                 if(valueAfterSale > promotion.getPromotion().getMaxValueForPercent()){
                     amountPrice -= promotion.getPromotion().getMaxValueForPercent();
