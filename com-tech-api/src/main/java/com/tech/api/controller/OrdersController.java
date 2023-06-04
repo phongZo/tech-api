@@ -513,11 +513,11 @@ public class OrdersController extends ABasicController{
 
     @PostMapping(value = "/client-create", produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    public ApiMessageDto<String> clientCreate(@Valid @RequestBody CreateOrdersClientForm createOrdersForm, BindingResult bindingResult) {
+    public ApiMessageDto<Long> clientCreate(@Valid @RequestBody CreateOrdersClientForm createOrdersForm, BindingResult bindingResult) {
         if(!isCustomer()){
             throw new RequestException(ErrorCode.ORDERS_ERROR_UNAUTHORIZED, "Not allowed to create.");
         }
-        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
+        ApiMessageDto<Long> apiMessageDto = new ApiMessageDto<>();
         Store store = checkStore(createOrdersForm);
         if(!store.getStatus().equals(Constants.STATUS_ACTIVE)){
             apiMessageDto.setResult(false);
@@ -585,6 +585,7 @@ public class OrdersController extends ABasicController{
         String htmlContent = getHtmlContent(orders,ordersDetailList);
         commonApiService.sendEmail(orders.getCustomer().getAccount().getEmail(),htmlContent,"Xác nhận đơn hàng",true);
 
+        apiMessageDto.setData(orders.getId());
         apiMessageDto.setMessage("Create orders success");
         return apiMessageDto;
     }
