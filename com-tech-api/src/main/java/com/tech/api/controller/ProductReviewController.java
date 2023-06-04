@@ -110,7 +110,7 @@ public class ProductReviewController extends ABasicController{
         productReview.setCustomer(customer);
         productReviewRepository.save(productReview);
         Integer productTotalReview = product.getTotalReview() + 1;
-        Integer productNewAvgStar = (product.getAvgStar() * product.getTotalReview() + 1) / productTotalReview;
+        Integer productNewAvgStar = (product.getAvgStar() * product.getTotalReview() + productReview.getStar()) / productTotalReview;
 
         product.setAvgStar(productNewAvgStar);
         product.setTotalReview(productTotalReview);
