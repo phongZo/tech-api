@@ -50,6 +50,9 @@ public class CartController extends ABasicController{
     @Autowired
     ProductRepository productRepository;
 
+    @Autowired
+    ProductVariantRepository productVariantRepository;
+
     @GetMapping(value = "/client-cart",produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<CartDto> getClientCart(){
         if(!isCustomer()){
@@ -94,11 +97,11 @@ public class CartController extends ABasicController{
     }
 
     @PostMapping(value = "/add-item", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<String> addItem(@Valid @RequestBody AddItemForm addItemForm, BindingResult bindingResult) {
+    public ApiMessageDto<Long> addItem(@Valid @RequestBody AddItemForm addItemForm, BindingResult bindingResult) {
         if(!isCustomer()){
             throw new RequestException(ErrorCode.CART_ERROR_UNAUTHORIZED, "Not allowed to add item.");
         }
-        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
+        ApiMessageDto<Long> apiMessageDto = new ApiMessageDto<>();
         Product product = productRepository.findById(addItemForm.getProductId()).orElse(null);
         if(product == null || product.getIsSoldOut()|| !product.getStatus().equals(Constants.STATUS_ACTIVE)){
             throw new RequestException(ErrorCode.PRODUCT_NOT_FOUND, "Not found product.");
@@ -114,7 +117,17 @@ public class CartController extends ABasicController{
             cart = cartRepository.save(cart);
         }
         LineItem lineItem = lineItemRepository.findByCartIdAndVariantId(cart.getId(),variant.getId());
-        if(lineItem != null) lineItem.setQuantity(lineItem.getQuantity() + 1);
+        if(lineItem != null) {
+            if(variant.getTotalInStock() != null){
+                if (lineItem.getQuantity() >= variant.getTotalInStock()){
+                    apiMessageDto.setResult(false);
+                    apiMessageDto.setData(-1L);
+                    apiMessageDto.setMessage("Stock not enough product");
+                    return apiMessageDto;
+                }
+            }
+            lineItem.setQuantity(lineItem.getQuantity() + 1);
+        }
         else {
             lineItem = new LineItem();
             lineItem.setCart(cart);
@@ -128,14 +141,23 @@ public class CartController extends ABasicController{
     }
 
     @PutMapping(value = "/items/quantity", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<String> updateQuantity(@Valid @RequestBody UpdateCartQuantity updateCartQuantity, BindingResult bindingResult) {
+    public ApiMessageDto<Long> updateQuantity(@Valid @RequestBody UpdateCartQuantity updateCartQuantity, BindingResult bindingResult) {
         if(!isCustomer()){
             throw new RequestException(ErrorCode.PRODUCT_REVIEW_ERROR_UNAUTHORIZED, "Not allowed to update quantity.");
         }
-        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
+        ApiMessageDto<Long> apiMessageDto = new ApiMessageDto<>();
         LineItem lineItem = lineItemRepository.findById(updateCartQuantity.getLineItemId()).orElse(null);
         if(lineItem == null){
             throw new RequestException(ErrorCode.LINE_ITEM_ERROR_NOT_FOUND, "Not found item.");
+        }
+        ProductVariant variant = productVariantRepository.findById(lineItem.getVariant().getId()).orElse(null);
+        if(variant != null && variant.getTotalInStock() != null){
+            if(variant.getTotalInStock() < updateCartQuantity.getQuantity()){
+                apiMessageDto.setResult(false);
+                apiMessageDto.setData(-1L);
+                apiMessageDto.setMessage("Stock not enough product");
+                return apiMessageDto;
+            }
         }
         lineItem.setQuantity(updateCartQuantity.getQuantity());
         lineItemRepository.save(lineItem);
