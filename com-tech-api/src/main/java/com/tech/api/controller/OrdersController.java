@@ -949,6 +949,10 @@ public class OrdersController extends ABasicController{
             item.setQuantity(ordersDetail.getAmount());
             listItem.add(item);
 
+            if(variant.getTotalInStock() < ordersDetail.getAmount()) continue;
+            variant.setTotalInStock(variant.getTotalInStock() - ordersDetail.getAmount());
+            productVariantRepository.save(variant);
+
             // update stock of store
             Stock stock = stockRepository.findFirstByProductVariantIdAndStoreId(variant.getId(),orders.getStore().getId());
             if(stock != null){
