@@ -1,17 +1,23 @@
 pipeline {
-  agent any
+  agent {
+  	docker {
+  		image "maven:3.6.0-jdk-13"
+  		label "docker"
+  	}
+  }
+
   stages {
-    stage('Checkout Code') {
-      steps {
-        git(url: 'https://github.com/phongZo/tech-api', branch: 'dev')
-      }
-    }
+  	stage("Build") {
+  		steps {
+  			sh "mvn -version"
+  			sh "mvn clean install"
+  		}
+  	}
+  }
 
-    stage('Write log') {
-      steps {
-        sh 'ls -la'
-      }
-    }
-
+  post {
+  	always {
+  		cleanWs()
+  	}
   }
 }
